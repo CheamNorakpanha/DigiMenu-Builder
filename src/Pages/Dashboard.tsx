@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { PlusCircle, Sun, Moon, LogOut, X } from 'lucide-react'
+import { PlusCircle, X } from 'lucide-react'
+import Header from '../components/dashboard/Header'
+import { allRestaurants } from '../components/dashboard/ExploreRestaurantConfig';
 
 type Restaurant = {
     id: string
@@ -8,13 +10,6 @@ type Restaurant = {
     location: string
     contactNumber: string
     coverImage: string
-}
-
-type ExploreRestaurant = {
-    Eid: string
-    Ename: string
-    Eaddress: string
-    EcoverImage: string
 }
 
 export default function Dashboard() {
@@ -95,85 +90,17 @@ export default function Dashboard() {
         }
     }
 
-    // URLs for restaurant cover images
-    const image1 = 'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/13/9f/4a/50/brasserie-dining-room.jpg?w=1000&h=-1&s=1';
-    const image2 = 'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/15/ac/d2/f4/namaste-india-bkk-a-touch.jpg?w=1000&h=-1&s=1';
-    const image3 = 'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/1d/49/e0/0c/restaurant-le-royal-at.jpg?w=900&h=-1&s=1';
-    const image4 = 'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/1c/bf/3d/d1/lantern-rooftop-bar-live.jpg?w=1000&h=-1&s=1';
-    const image5 = 'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2b/3a/71/c4/caption.jpg?w=900&h=500&s=1';
-    const image6 = 'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/1d/e8/4e/ed/view-from-the-stage-area.jpg?w=1000&h=-1&s=1';
-    const image7 = 'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/1c/c6/8f/89/hyatt-regency-the-attic.jpg?w=1000&h=-1&s=1';
-    const image8 = 'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/26/38/92/c0/hall-of-golden-chimes.jpg?w=1000&h=-1&s=1';
-    const image9 = 'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/25/15/c3/b3/hemisphere-rooftop.jpg?w=1000&h=-1&s=1';
-
-    // Mock data for restaurants
-    const allRestaurants: ExploreRestaurant[] = [
-        { Eid: '1', Ename: "Brasserie Louis", Eaddress: "66 Monivong Boulevard, Phnom Penh 120211 Cambodia", EcoverImage: image1 },
-        { Eid: '2', Ename: "Namaste India Restaurant BKK", Eaddress: "#177, Street 63 Corner 294, Phnom Penh 12302 Cambodia", EcoverImage: image2 },
-        { Eid: '3', Ename: "Restaurant Le Royal", Eaddress: "92 Rukhak Vithei Daun Penh Sangkat Wat Phnom, Phnom Penh 12202 Cambodia", EcoverImage: image3 },
-        { Eid: '4', Ename: "Lantern Rooftop Bar", Eaddress: "Baitong Hotel and Resort, number 10, St. 282 Sangkat Boeng Keng Kang I, Khan Chamkarmon, Phnom Penh 12302 Cambodia", EcoverImage: image4 },
-        { Eid: '5', Ename: "Boma - Mediterranean Cuisine", Eaddress: "Rue Pasteur No. 51, Phnom Penh 12302 Cambodia", EcoverImage: image5 },
-        { Eid: '6', Ename: "Yiqi", Eaddress: "282 7th Floor #5 St Rise Commercial, BKK1, Phnom Penh 12000 Cambodia", EcoverImage: image6 },
-        { Eid: '7', Ename: "The Attic", Eaddress: "#55, Street 178 Sangkat Chey Chumnas, Phnom Penh 12206 Cambodia", EcoverImage: image7 },
-        { Eid: '8', Ename: "Hall of Golden Chimes", Eaddress: "Level 5, NagaWorld2 Samdech Hun Sen Park, Phnom Penh 120101 Cambodia", EcoverImage: image8 },
-        { Eid: '9', Ename: "Hemisphere Sky Bar", Eaddress: "No 47 Corner St 01 And St 94 Village 9 On Top Of Tribe Hotel, 11th Floor, Phnom Penh 12202 Cambodia", EcoverImage: image9 },
-    ];
-
     return (
         <div className={`${darkMode ? 'dark' : ''}`}>
             <div className={`first-line:flex flex-col min-h-screen bg-white dark:bg-black text-gray-900 dark:text-white transition-colors`}>
-                <header className="bg-white dark:bg-black shadow border-b border-gray-300 dark:border-[#947198] transition-colors">
-                    <nav className="container mx-auto px-6 py-3">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center">
-                                <Link to="/" className="flex items-center text-gray-800 hover:text-gray-600">
-                                    {/* A logo */}
-                                    <span className="ml-2 text-xl font-bold text-[#764ab3] dark:text-[#764ab3]">DigiMenu Builder</span>
-                                </Link>
-                                <div className="ml-10 space-x-4">
-                                    <button
-                                        onClick={() => setActiveTab('myRestaurants')}
-                                        className={`text-[#764ab3] dark:text-[#d3a1d9] hover:text-[#764ab3] dark:hover:text-[#d3a1d9]
-                                        ${activeTab === 'myRestaurants' ? 'font-bold' : 'text-gray-700 dark:text-gray-300'}`}
-                                    >
-                                        Restaurants
-                                    </button>
-                                    <button
-                                        onClick={() => setActiveTab('explore')}
-                                        className={`text-[#764ab3] dark:text-[#d3a1d9] hover:text-[#764ab3] dark:hover:text-[#d3a1d9]
-                                        ${activeTab === 'explore' ? ' font-bold' : 'text-gray-700 dark:text-gray-300'}`}
-                                    >
-                                        Explore
-                                    </button>
-                                </div>
-                            </div>
-                            <div className="flex items-center space-x-4">
-                                <button onClick={toggleDarkMode} className="p-2 rounded-lg bg-transparent dark:bg-transparent text-gray-500 dark:text-yellow-400 border border-gray-500">
-                                    {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-                                </button>
-                                <div className="relative">
-                                    <button
-                                        onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                        className="flex items-center space-x-2 text-gray-800"
-                                    >
-                                        <img className="w-10 h-10 rounded-lg" src="https://i.pinimg.com/564x/1b/fe/36/1bfe365fd8dcf18d5d43304999057a6e.jpg" alt="Default avatar" />
-                                    </button>
-                                    {isProfileOpen && (
-                                        <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-black border border-gray-400 dark:border-[#947198] p-1">
-                                            <p className='w-full px-4 py-2 text-sm text-gray-600 dark:text-[#d3a1d9]'>Cheam Norakpanha</p>
-                                            <button
-                                                className="flex items-center w-full px-4 py-2 text-sm rounded text-red-500 dark:text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50"
-                                            >
-                                                <LogOut className="mr-2 h-4 w-4 text-red-500 dark:text-red-600" />
-                                                Logout
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </nav>
-                </header>
+                <Header
+                    darkMode={darkMode}
+                    toggleDarkMode={toggleDarkMode}
+                    isProfileOpen={isProfileOpen}
+                    setIsProfileOpen={setIsProfileOpen}
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                />
 
                 <main className="flex-grow container mx-auto px-6 py-8">
                     {activeTab === 'myRestaurants' ? (
