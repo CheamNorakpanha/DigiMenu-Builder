@@ -18,10 +18,10 @@ export default function Dashboard() {
     const [isProfileOpen, setIsProfileOpen] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [newRestaurant, setNewRestaurant] = useState<Omit<Restaurant, 'id'>>({
-        name: '',
-        location: '',
-        contactNumber: '',
-        coverImage: ''
+        name: 'New York Beef Burger (Tonle Basak)',
+        location: 'St. 308, Sangkat Tonle Bassac, Khan Chamkar Mon, Phnom Penh',
+        contactNumber: '1234567890',
+        coverImage: 'https://img.freepik.com/free-photo/street-food-still-life_23-2151535299.jpg?t=st=1730601966~exp=1730605566~hmac=fc0f6c9f9e53b3e36b1f93e7c577fc1117b0620fa16d8dcf23f87723ca4840be&w=1380'
     })
     const [restaurants, setRestaurants] = useState<Restaurant[]>([])
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -81,6 +81,7 @@ export default function Dashboard() {
         }
     }
 
+
     const handleSave = () => {
         if (newRestaurant.name && newRestaurant.location && newRestaurant.contactNumber && newRestaurant.coverImage) {
             const newRestaurantWithId = { ...newRestaurant, id: Date.now().toString() }
@@ -120,20 +121,22 @@ export default function Dashboard() {
                             </p>
                             <div className="transition-colors grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {restaurants.map((restaurant) => (
-                                    <div key={restaurant.id} className="bg-white dark:bg-black rounded-lg shadow-md overflow-hidden border border-gray-500 dark:border-[#947198]">
-                                        <img
-                                            src={restaurant.coverImage}
-                                            alt={`${restaurant.name} cover`}
-                                            width={400}
-                                            height={200}
-                                            className="w-full h-48 object-cover"
-                                        />
-                                        <div className="p-4">
-                                            <h2 className="text-xl font-semibold mb-2">{restaurant.name}</h2>
-                                            <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-1`}>{restaurant.location}</p>
-                                            {/* <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{restaurant.contactNumber}</p> */}
+                                    <Link to={'/menu'} target="_blank">
+                                        <div key={restaurant.id} className="bg-white dark:bg-black rounded-lg shadow-md overflow-hidden border border-gray-500 dark:border-[#947198]">
+                                            <img
+                                                src={restaurant.coverImage}
+                                                alt={`${restaurant.name} cover`}
+                                                width={400}
+                                                height={200}
+                                                className="w-full h-48 object-cover"
+                                            />
+                                            <div className="p-4">
+                                                <h2 className="text-xl font-semibold mb-2">{restaurant.name}</h2>
+                                                <p className={`dark:text-gray-300 text-gray-600 mb-1`}>{restaurant.location}</p>
+                                                {/* <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{restaurant.contactNumber}</p> */}
+                                            </div>
                                         </div>
-                                    </div>
+                                    </Link>
                                 ))}
                             </div>
                         </div>

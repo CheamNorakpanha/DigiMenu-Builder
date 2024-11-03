@@ -36,20 +36,22 @@ export default function LandingPage() {
     };
 
     return (
-        <div className={`flex flex-col min-h-screen ${darkMode ? 'dark' : ''}`}>
+        <div className={`${darkMode ? 'dark' : ''}`}>
+            <div className="flex flex-col min-h-screen">
 
-            <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+                <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 
-            <main className="flex-1">
-                <WelcomeSection isAuthenticated={isAuthenticated} handleLogin={handleLogin} />
-                <HowItWorksSection />
-                <SeeItInActionSection />
-                <WhyDigiMenuBuilderSection />
-                <PricingSection />
-                <ContactSection />
-            </main>
-            
-            <Footer />
+                <main className="flex-1">
+                    <WelcomeSection isAuthenticated={isAuthenticated} handleLogin={handleLogin} />
+                    <HowItWorksSection />
+                    <SeeItInActionSection />
+                    <WhyDigiMenuBuilderSection />
+                    <PricingSection />
+                    <ContactSection />
+                </main>
+
+                <Footer />
+            </div>
         </div>
     );
 }
