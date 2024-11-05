@@ -1,9 +1,11 @@
+// ExploreRestaurantConfig.ts
+
 type ExploreRestaurant = {
-    Eid: string
-    Ename: string
-    Eaddress: string
-    EcoverImage: string
-}
+    Eid: string;
+    Ename: string;
+    Eaddress: string;
+    EcoverImage: string;
+};
 
 // URLs for restaurant cover images
 const image1 = 'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/13/9f/4a/50/brasserie-dining-room.jpg?w=1000&h=-1&s=1';

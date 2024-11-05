@@ -8,7 +8,7 @@ import PricingSection from '../components/home/PricingSection';
 import ContactSection from '../components/home/ContactSection';
 import Footer from '../components/home/Footer';
 
-export default function LandingPage() {
+export default function Home() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [darkMode, setDarkMode] = useState(false);
 
