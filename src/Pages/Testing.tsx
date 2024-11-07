@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { PlusCircle, X, MoreVertical, Edit, Trash } from 'lucide-react'
 import Header from '../components/dashboard/Header'
+import { Link } from 'react-router-dom'
 import { allRestaurants } from '../components/dashboard/ExploreRestaurantConfig'
-import Footer from '../components/dashboard/Footer'
 
 type Restaurant = {
     id: string
@@ -24,6 +24,7 @@ export default function Dashboard() {
         contactNumber: '1234567890',
         coverImage: 'https://img.freepik.com/free-photo/street-food-still-life_23-2151535299.jpg?t=st=1730601966~exp=1730605566~hmac=fc0f6c9f9e53b3e36b1f93e7c577fc1117b0620fa16d8dcf23f87723ca4840be&w=1380'
     })
+
     const [editingRestaurant, setEditingRestaurant] = useState<Restaurant | null>(null)
     const [restaurants, setRestaurants] = useState<Restaurant[]>([])
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
@@ -188,7 +189,7 @@ export default function Dashboard() {
                                                     ref={dropdownRef}
                                                     className={`absolute right-0 mt-2 w-48 rounded-lg shadow-lg p-1 bg-white dark:bg-black border border-gray-400 dark:border-[#947198]`}
                                                 >
-                                                    <button 
+                                                    <button
                                                         onClick={() => handleEdit(restaurant.id)}
                                                         className={`flex items-center w-full px-4 py-2 text-sm rounded text-gray-600 dark:text-[#d3a1d9] hover:bg-red-100 dark:hover:bg-fuchsia-300/25`}
                                                     >
@@ -389,7 +390,15 @@ export default function Dashboard() {
                     </div>
                 )}
 
-                <Footer />
+                <div className="relative">
+                    <footer className="fixed inset-x-0 bottom-0 bg-white dark:bg-black text-white transition-colors duration-200">
+                        <div className="border-t border-gray-300 dark:border-[#d3a1d9] py-4 text-center">
+                            <Link to="/home" className="text-sm text-gray-500 dark:text-[#d3a1d9] hover:text-[#d3a1d9] dark:hover:text-[#947198] transition-colors">
+                                © 2024 DigiMenu Builder. All rights reserved.
+                            </Link>
+                        </div>
+                    </footer>
+                </div>
             </div>
         </div>
     )
