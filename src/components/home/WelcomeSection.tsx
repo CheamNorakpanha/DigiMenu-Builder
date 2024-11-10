@@ -22,7 +22,7 @@ export default function WelcomeSection({ isAuthenticated, handleLogin }: { isAut
                     </div>
                     <div className="space-y-4 w-full max-w-sm">
                         {isAuthenticated ? (
-                            <Link to="/dashboard" className="inline-flex w-full items-center justify-center rounded-md bg-[#35246c] px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[#25194b] hover:brightness-90 focus:outline-none focus:ring-offset-2 dark:focus:ring-offset-gray-900">
+                            <Link to="/restaurant" className="inline-flex w-full items-center justify-center rounded-md bg-[#35246c] px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[#25194b] hover:brightness-90 focus:outline-none focus:ring-offset-2 dark:focus:ring-offset-gray-900">
                                 Go to Dashboard
                             </Link>
                         ) : (

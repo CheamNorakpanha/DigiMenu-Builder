@@ -1,16 +1,16 @@
-import { Link } from 'react-router-dom'
-import { Sun, Moon, LogOut } from 'lucide-react'
+import { Link, useLocation } from 'react-router-dom';
+import { Sun, Moon, LogOut } from 'lucide-react';
 
 type HeaderProps = {
     darkMode: boolean;
     toggleDarkMode: () => void;
     isProfileOpen: boolean;
     setIsProfileOpen: (open: boolean) => void;
-    activeTab: 'myRestaurants' | 'explore';
-    setActiveTab: (tab: 'myRestaurants' | 'explore') => void;
 };
 
-export default function Navbar({ darkMode, toggleDarkMode, isProfileOpen, setIsProfileOpen, activeTab, setActiveTab }: HeaderProps) {
+export default function Navbar({ darkMode, toggleDarkMode, isProfileOpen, setIsProfileOpen }: HeaderProps) {
+    const location = useLocation();
+
     return (
         <header className="bg-white dark:bg-black shadow border-b border-gray-300 dark:border-[#947198] transition-colors">
             <nav className="container mx-auto px-6 py-3">
@@ -21,20 +21,22 @@ export default function Navbar({ darkMode, toggleDarkMode, isProfileOpen, setIsP
                             <span className="ml-2 text-xl font-bold text-[#764ab3] dark:text-[#764ab3]">DigiMenu Builder</span>
                         </Link>
                         <div className="ml-10 space-x-4">
-                            <button
-                                onClick={() => setActiveTab('myRestaurants')}
-                                className={`text-[#764ab3] dark:text-[#d3a1d9] hover:text-[#764ab3] dark:hover:text-[#d3a1d9]
-                                        ${activeTab === 'myRestaurants' ? 'font-bold' : 'text-gray-700 dark:text-gray-300'}`}
+                            <Link
+                                to="/restaurant"
+                                className={`${
+                                    location.pathname === '/restaurant' ? 'text-[#764ab3] font-bold' : 'text-gray-500'
+                                } dark:text-[#d3a1d9] hover:text-[#764ab3] dark:hover:text-[#d3a1d9]`}
                             >
                                 Restaurants
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('explore')}
-                                className={`text-[#764ab3] dark:text-[#d3a1d9] hover:text-[#764ab3] dark:hover:text-[#d3a1d9]
-                                        ${activeTab === 'explore' ? ' font-bold' : 'text-gray-700 dark:text-gray-300'}`}
+                            </Link>
+                            <Link
+                                to="/explore"
+                                className={`${
+                                    location.pathname === '/explore' ? 'text-[#764ab3] font-bold' : 'text-gray-500'
+                                } dark:text-[#d3a1d9] hover:text-[#764ab3] dark:hover:text-[#d3a1d9]`}
                             >
                                 Explore
-                            </button>
+                            </Link>
                         </div>
                     </div>
                     <div className="flex items-center space-x-4">
@@ -64,5 +66,5 @@ export default function Navbar({ darkMode, toggleDarkMode, isProfileOpen, setIsP
                 </div>
             </nav>
         </header>
-    )
+    );
 }

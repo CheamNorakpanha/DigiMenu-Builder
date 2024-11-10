@@ -1,35 +1,22 @@
 import { useState, useEffect, useRef } from 'react'
-import { PlusCircle, X, MoreVertical, Edit, Trash } from 'lucide-react'
-import Header from '../components/dashboard/Header'
-import { allRestaurants } from '../components/dashboard/ExploreRestaurantConfig'
-import Footer from '../components/dashboard/Footer'
-
-type Restaurant = {
-    id: string
-    name: string
-    location: string
-    contactNumber: string
-    coverImage: string
-}
+import { Utensils, Image as ImageIcon, BarChart3, Star, X, Copy, Download, EyeOff, Eye } from 'lucide-react'
+import Header from '../components/restaurant/Header'
+import Footer from '../components/home/Footer'
+import { Link } from 'react-router-dom'
+import QRCode from 'qrcode'
 
 export default function Dashboard() {
-    const [activeTab, setActiveTab] = useState<'myRestaurants' | 'explore'>('myRestaurants')
     const [darkMode, setDarkMode] = useState(false)
     const [isProfileOpen, setIsProfileOpen] = useState(false)
-    const [isModalOpen, setIsModalOpen] = useState(false)
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-    const [newRestaurant, setNewRestaurant] = useState<Omit<Restaurant, 'id'>>({
-        name: 'New York Beef Burger (Tonle Basak)',
-        location: 'St. 308, Sangkat Tonle Bassac, Khan Chamkar Mon, Phnom Penh',
-        contactNumber: '1234567890',
-        coverImage: 'https://img.freepik.com/free-photo/street-food-still-life_23-2151535299.jpg?t=st=1730601966~exp=1730605566~hmac=fc0f6c9f9e53b3e36b1f93e7c577fc1117b0620fa16d8dcf23f87723ca4840be&w=1380'
-    })
-    const [editingRestaurant, setEditingRestaurant] = useState<Restaurant | null>(null)
-    const [restaurants, setRestaurants] = useState<Restaurant[]>([])
-    const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
-    const fileInputRef = useRef<HTMLInputElement>(null)
-    const editFileInputRef = useRef<HTMLInputElement>(null)
-    const dropdownRef = useRef<HTMLDivElement>(null)
+    const [isPublishModalOpen, setIsPublishModalOpen] = useState(false)
+    const [isPublished, setIsPublished] = useState(false)
+    const [qrCodeUrl, setQrCodeUrl] = useState('')
+    const [copiedUrl, setCopiedUrl] = useState<string | null>(null)
+    const [showCopyNotification, setShowCopyNotification] = useState(false)
+    const copyTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+    const previewUrl = 'https://digimenu.com/restaurant/example/preview'
+    const publishedUrl = 'http://localhost:3000/menu'
 
     useEffect(() => {
         const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -39,16 +26,19 @@ export default function Dashboard() {
         if (darkModeMediaQuery.matches) {
             setDarkMode(false); // Set dark mode if the user prefers it
         }
+    }, [])
 
-        const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                setActiveDropdown(null)
-            }
+    useEffect(() => {
+        if (isPublished) {
+            generateQRCode()
         }
+    }, [isPublished])
 
-        document.addEventListener('mousedown', handleClickOutside)
+    useEffect(() => {
         return () => {
-            document.removeEventListener('mousedown', handleClickOutside)
+            if (copyTimeoutRef.current) {
+                clearTimeout(copyTimeoutRef.current)
+            }
         }
     }, [])
 
@@ -56,338 +46,255 @@ export default function Dashboard() {
         setDarkMode(!darkMode)
     }
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, isEditing: boolean = false) => {
-        const { name, value } = e.target
-        if (isEditing && editingRestaurant) {
-            setEditingRestaurant({ ...editingRestaurant, [name]: value })
-        } else {
-            setNewRestaurant(prev => ({ ...prev, [name]: value }))
+    const generateQRCode = async () => {
+        try {
+            const url = await QRCode.toDataURL(publishedUrl)
+            setQrCodeUrl(url)
+        } catch (err) {
+            console.error('Error generating QR code:', err)
         }
     }
 
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, isEditing: boolean = false) => {
-        const file = e.target.files?.[0]
-        if (file) {
-            const reader = new FileReader()
-            reader.onloadend = () => {
-                if (isEditing && editingRestaurant) {
-                    setEditingRestaurant({ ...editingRestaurant, coverImage: reader.result as string })
-                } else {
-                    setNewRestaurant(prev => ({ ...prev, coverImage: reader.result as string }))
-                }
+    const handleCopyUrl = async (url: string) => {
+        try {
+            await navigator.clipboard.writeText(url)
+            setCopiedUrl(url)
+            setShowCopyNotification(true)
+            if (copyTimeoutRef.current) {
+                clearTimeout(copyTimeoutRef.current)
             }
-            reader.readAsDataURL(file)
+            copyTimeoutRef.current = setTimeout(() => {
+                setShowCopyNotification(false)
+                setCopiedUrl(null)
+            }, 3000)
+        } catch (err) {
+            console.error('Failed to copy:', err)
         }
     }
 
-    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault()
-    }
-
-    const handleDrop = (e: React.DragEvent<HTMLDivElement>, isEditing: boolean = false) => {
-        e.preventDefault()
-        const file = e.dataTransfer.files?.[0]
-        if (file && file.type.startsWith('image/jpeg')) {
-            const reader = new FileReader()
-            reader.onloadend = () => {
-                if (isEditing && editingRestaurant) {
-                    setEditingRestaurant({ ...editingRestaurant, coverImage: reader.result as string })
-                } else {
-                    setNewRestaurant(prev => ({ ...prev, coverImage: reader.result as string }))
-                }
-            }
-            reader.readAsDataURL(file)
-        }
-    }
-
-    const handleSave = () => {
-        if (newRestaurant.name && newRestaurant.location && newRestaurant.contactNumber && newRestaurant.coverImage) {
-            const newRestaurantWithId = { ...newRestaurant, id: Date.now().toString() }
-            setRestaurants(prev => [...prev, newRestaurantWithId])
-            setNewRestaurant({ name: '', location: '', contactNumber: '', coverImage: '' })
-            setIsModalOpen(false)
-        }
-    }
-
-    const handleEdit = (id: string) => {
-        const restaurantToEdit = restaurants.find(restaurant => restaurant.id === id)
-        if (restaurantToEdit) {
-            setEditingRestaurant(restaurantToEdit)
-            setIsEditModalOpen(true)
-        }
-        setActiveDropdown(null)
-    }
-
-    const handleUpdate = () => {
-        if (editingRestaurant) {
-            setRestaurants(prev => prev.map(restaurant =>
-                restaurant.id === editingRestaurant.id ? editingRestaurant : restaurant
-            ))
-            setEditingRestaurant(null)
-            setIsEditModalOpen(false)
-        }
-    }
-
-    const handleDelete = (id: string) => {
-        setRestaurants(prev => prev.filter(restaurant => restaurant.id !== id))
-        setActiveDropdown(null)
+    const handleDownloadQR = () => {
+        const link = document.createElement('a')
+        link.download = 'menu-qr-code.png'
+        link.href = qrCodeUrl
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
     }
 
     return (
         <div className={`${darkMode ? 'dark' : ''}`}>
-            <div className={`first-line:flex flex-col min-h-screen bg-white dark:bg-black text-gray-900 dark:text-white transition-colors`}>
+            <div className={`flex flex-col min-h-screen bg-white text-gray-900 dark:bg-black dark:text-white transition-colors`}>
                 <Header
                     darkMode={darkMode}
                     toggleDarkMode={toggleDarkMode}
                     isProfileOpen={isProfileOpen}
                     setIsProfileOpen={setIsProfileOpen}
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
                 />
 
                 <main className="flex-grow container mx-auto px-6 py-8">
-                    {activeTab === 'myRestaurants' ? (
+                    <div className="mb-6 flex items-center">
                         <div>
-                            <div className="flex justify-between items-center mb-6">
-                                <h1 className="text-3xl font-bold">My Restaurants</h1>
-                                <button
-                                    onClick={() => setIsModalOpen(true)}
-                                    className="bg-transparent dark:bg-transparent text-black dark:text-white px-4 py-2 rounded-md transition-colors flex items-center border border-gray-400 dark:border-[#947198]"
-                                >
-                                    <PlusCircle className="mr-2 h-5 w-5" />
-                                    Add new restaurant
-                                </button>
+                            <nav className="flex items-center space-x-2 text-md text-gray-600 dark:text-white">
+                                <Link to="/restaurant" className="hover:underline hover:text-[#d3a1d9] dark:hover:text-[#947198] transition-colors">Restaurant</Link>
+                                <span className="dark:text-[#d3a1d9] ">/</span>     
+                                <span className="">New York Beef Burger (Tonle Basak)</span>
+                            </nav>
+                        </div>
+                        <button
+                            onClick={() => setIsPublishModalOpen(true)}
+                            className={`flex justify-between items-center ml-auto px-4 py-2 rounded-lg ${isPublished ? 'bg-[#71389d] hover:bg-[#4f276d] dark:bg-[#9f6ea3] dark:hover:bg-[#624d66]' : 'bg-[#b883e3]/75 hover:bg-[#9c6dae] dark:bg-[#d3a1d9] dark:hover:bg-[#947198]'} text-white`}
+                        >
+                            <div className="flex items-center">
+                                {isPublished ? <Eye className="mr-2 h-5 w-5" /> : <EyeOff className="mr-2 h-5 w-5" />}
+                                {isPublished ? 'Published' : 'Not Published'}
                             </div>
-                            <p className="text-gray-600 mb-8 dark:text-[#947198]">
-                                Start creating a new digital menu by adding a new restaurant.
-                            </p>
-                            <div className="transition-colors grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {restaurants.map((restaurant) => (
-                                    <div key={restaurant.id} className={`bg-white dark:bg-black rounded-lg shadow-md overflow-hidden relative border border-gray-500 dark:border-[#947198]`}>
-                                        <img
-                                            src={restaurant.coverImage}
-                                            alt={`${restaurant.name} cover`}
-                                            width={400}
-                                            height={200}
-                                            className="w-full h-48 object-cover"
+
+                        </button>
+
+                    </div>
+
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        <Link to="/menus">
+                            <div className={`rounded-lg bg-white hover:bg-gray-50 dark:bg-black dark:hover:bg-zinc-900 shadow-md overflow-hidden transition-colors border border-gray-500 dark:border-[#947198]`}>
+                                <div className="p-6">
+                                    <div className="flex justify-center mb-4">
+                                        <Utensils className={`h-12 w-12 dark:text-[#947198] text-zinc-800`} />
+                                    </div>
+                                    <h3 className="text-xl font-semibold text-center mb-2">Menus</h3>
+                                    <p className={`text-center text-gray-600 dark:text-gray-400`}>
+                                        Manage the menus, categories and individual menu items of your restaurant
+                                    </p>
+                                </div>
+                            </div>
+                        </Link>
+                        <Link to="/banners">
+                            <div className={`rounded-lg bg-white hover:bg-gray-50 dark:bg-black dark:hover:bg-zinc-900 shadow-md overflow-hidden transition-colors border border-gray-500 dark:border-[#947198]`}>
+                                <div className="p-6">
+                                    <div className="flex justify-center mb-4">
+                                        <ImageIcon className={`h-12 w-12 dark:text-[#947198] text-zinc-800`} />
+                                    </div>
+                                    <h3 className="text-xl font-semibold text-center mb-2">Banners</h3>
+                                    <p className={`text-center text-gray-600 dark:text-gray-400`}>
+                                        Manage banners that could be used to display promotional content in your restaurant menu
+                                    </p>
+                                </div>
+                            </div>
+                        </Link>
+                        <div className={`rounded-lg bg-white dark:bg-black shadow-md overflow-hidden opacity-70 border border-gray-500 dark:border-[#947198]`}>
+                            <div className="p-6">
+                                <div className="flex justify-center mb-4">
+                                    <Star className={`h-12 w-12 dark:text-[#947198] text-zinc-800`} />
+                                </div>
+                                <h3 className="text-xl font-semibold text-center mb-2">Feedback (Coming Soon)</h3>
+                                <p className={`text-center text-gray-600 dark:text-gray-400`}>
+                                    View feedback received from your restaurant customers
+                                </p>
+                            </div>
+                        </div>
+                        <div className={`rounded-lg bg-white dark:bg-black shadow-md overflow-hidden opacity-70 border border-gray-500 dark:border-[#947198]`}>
+                            <div className="p-6">
+                                <div className="flex justify-center mb-4">
+                                    <BarChart3 className={`h-12 w-12 dark:text-[#947198] text-zinc-800`} />
+                                </div>
+                                <h3 className="text-xl font-semibold text-center mb-2">Stats (Coming Soon)</h3>
+                                <p className={`text-center text-gray-600 dark:text-gray-400`}>
+                                    Gain insights on how many people view your published menu and which items are most popular
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Publish Modal */}
+                    {isPublishModalOpen && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+                            <div className={`bg-white dark:bg-black rounded-lg p-6 w-full max-w-md relative border border-gray-600 dark:border-[#947198]`}>
+                                <button
+                                    onClick={() => setIsPublishModalOpen(false)}
+                                    className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
+                                >
+                                    <X className="h-5 w-5" />
+                                </button>
+
+                                <h2 className="text-xl font-semibold mb-4">Publish and share your menu</h2>
+
+                                {/* Status Message */}
+                                <div className={`p-4 rounded-lg mb-4 ${isPublished
+                                    ? 'bg-green-50 text-green-700 dark:bg-green-600/25 dark:text-green-50'
+                                    : 'bg-yellow-50 text-orange-700 dark:bg-red-500/25 dark:text-orange-100'
+                                    }`}>
+                                    <div className="flex items-start">
+                                        {isPublished ? (
+                                            <>
+                                                <div className="flex-shrink-0">✓</div>
+                                                <div className="ml-3">
+                                                    <p className="font-medium">Menu is published</p>
+                                                    <p className="mt-1 text-sm">Changes to the menu could take around 30 minutes to be reflected in the published menu page</p>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div className="flex-shrink-0">!</div>
+                                                <div className="ml-3">
+                                                    <p className="font-medium">Menu is not published</p>
+                                                    <p className="mt-1 text-sm">
+                                                        Please publish the menu once you have finalized your changes. Once published, you will be able to either share the direct URL or the QR code for your menu with your customers
+                                                    </p>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Publish Toggle */}
+                                <div className={`flex items-center justify-between p-4 rounded-lg mb-4 bg-gray-100 dark:bg-fuchsia-300/15`}>
+                                    <span className="font-medium">Publish Menu</span>
+                                    <button
+                                        onClick={() => setIsPublished(!isPublished)}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isPublished ? 'bg-[#71389d] dark:bg-[#947198]' : 'bg-gray-300 dark:bg-[#b6a5b8]'}`}
+                                    >
+                                        <span
+                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isPublished ? 'translate-x-6' : 'translate-x-1'
+                                                }`}
                                         />
-                                        <div className="p-4">
-                                            <h2 className="text-xl font-semibold mb-2">{restaurant.name}</h2>
-                                            <p className={`text-gray-600 dark:text-gray-300  mb-1`}>{restaurant.location}</p>
-                                            {/* <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{restaurant.contactNumber}</p> */}
-                                        </div>
-                                        <div className="absolute top-2 right-2">
-                                            <button
-                                                onClick={() => setActiveDropdown(activeDropdown === restaurant.id ? null : restaurant.id)}
-                                                className={`p-1 rounded-lg bg-white text-gray-800 dark:bg-black dark:text-gray-200`}
-                                            >
-                                                <MoreVertical className="h-5 w-5" />
-                                            </button>
-                                            {activeDropdown === restaurant.id && (
-                                                <div
-                                                    ref={dropdownRef}
-                                                    className={`absolute right-0 mt-2 w-48 rounded-lg shadow-lg p-1 bg-white dark:bg-black border border-gray-400 dark:border-[#947198]`}
-                                                >
-                                                    <button 
-                                                        onClick={() => handleEdit(restaurant.id)}
-                                                        className={`flex items-center w-full px-4 py-2 text-sm rounded text-gray-600 dark:text-[#d3a1d9] hover:bg-red-100 dark:hover:bg-fuchsia-300/25`}
-                                                    >
-                                                        <Edit className="mr-2 h-4 w-4" />
-                                                        Edit
-                                                    </button>
+                                    </button>
+                                </div>
+
+                                {/* Published URL */}
+                                {isPublished && (
+                                    <>
+                                        <div className="mb-4">
+                                            <p className="text-sm font-medium mb-2">Published menu URL</p>
+                                            <div className={`flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-fuchsia-300/15`}>
+                                                <span className="text-sm truncate flex-1">
+                                                    <a href={publishedUrl} target="_blank" rel="noopener noreferrer">
+                                                        {publishedUrl}
+                                                    </a>
+                                                </span>
+                                                <div className="relative">
                                                     <button
-                                                        onClick={() => handleDelete(restaurant.id)}
-                                                        className={`flex items-center w-full px-4 py-2 text-sm rounded text-red-500 dark:text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50`}
+                                                        onClick={() => handleCopyUrl(publishedUrl)}
+                                                        className="p-1 rounded"
                                                     >
-                                                        <Trash className="mr-2 h-4 w-4 text-red-500 dark:text-red-600" />
-                                                        Delete
+                                                        <Copy className="h-4 w-4" />
                                                     </button>
+                                                    {showCopyNotification && copiedUrl === publishedUrl && (
+                                                        <div className="absolute right-0 top-full mt-2 bg-gray-800 text-white text-xs rounded py-1 px-2">
+                                                            URL copied!
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* QR Code */}
+                                        {qrCodeUrl && (
+                                            <div className="mb-4">
+                                                <div className="flex justify-center mb-4">
+                                                    <img src={qrCodeUrl} alt="Menu QR Code" width={200} height={200} />
+                                                </div>
+                                                <button
+                                                    onClick={handleDownloadQR}
+                                                    className="w-full flex items-center justify-center gap-2 text-[#71389d] hover:text-[#4f276d] dark:text-[#d3a1d9] dark:hover:text-[#947198]"
+                                                >
+                                                    <Download className="h-4 w-4" />
+                                                    Download QR code
+                                                </button>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+
+                                {/* Preview URL */}
+                                <div>
+                                    <p className="text-sm font-medium mb-2">Preview URL</p>
+                                    <p className="text-sm text-gray-500 mb-2">
+                                        The following URL can be used for testing purposes as it will mimic the interface of actual menu while also updating in real time
+                                    </p>
+                                    <div className={`flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-fuchsia-300/15`}>
+                                        <span className="text-sm truncate flex-1">
+                                            <a href={previewUrl} target="_blank" rel="noopener noreferrer">
+                                                {previewUrl}
+                                            </a>
+                                        </span>
+                                        <div className="relative">
+                                            <button
+                                                onClick={() => handleCopyUrl(previewUrl)}
+                                                className="p-1 hover:bg-gray-200 rounded"
+                                            >
+                                                <Copy className="h-4 w-4" />
+                                            </button>
+                                            {showCopyNotification && copiedUrl === previewUrl && (
+                                                <div className="absolute right-0 top-full mt-2 bg-gray-800 text-white text-xs rounded py-1 px-2">
+                                                    URL copied!
                                                 </div>
                                             )}
                                         </div>
                                     </div>
-                                ))}
-                            </div>
-                        </div>
-                    ) : (
-                        <div className='mb-20'>
-                            <h1 className="text-3xl font-bold mb-4">Explore Restaurants</h1>
-                            <p className="text-gray-600 dark:text-[#947198] mb-8 ">
-                                Following are the restaurants published by all users.
-                            </p>
-                            {/* Add explore restaurants content here */}
-                            <div className="transition-colors grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {allRestaurants.map((restaurant) => (
-                                    <div key={restaurant.Eid} className="bg-white dark:bg-black rounded-lg shadow-md overflow-hidden border border-gray-500 dark:border-[#947198]">
-                                        <img
-                                            src={restaurant.EcoverImage}
-                                            alt={`${restaurant.Ename} cover`}
-                                            width={400}
-                                            height={200}
-                                            className="w-full h-48 object-cover"
-                                        />
-                                        <div className="p-4">
-                                            <h2 className="text-xl font-semibold mb-2">{restaurant.Ename}</h2>
-                                            <p className="text-gray-600 dark:text-gray-400">{restaurant.Eaddress}</p>
-                                        </div>
-                                    </div>
-                                ))}
+                                </div>
                             </div>
                         </div>
                     )}
                 </main>
-
-                {isModalOpen && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-                        <div className={`bg-white dark:bg-black rounded-lg p-6 w-full max-w-md`}>
-                            <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-2xl font-bold">Add Restaurant</h2>
-                                <button onClick={() => setIsModalOpen(false)} className="text-gray-500 hover:text-gray-700">
-                                    <X className="h-6 w-6" />
-                                </button>
-                            </div>
-                            <div className="space-y-4">
-                                <div>
-                                    <label htmlFor="name" className="block text-sm font-medium mb-1">Name</label>
-                                    <input
-                                        type="text"
-                                        id="name"
-                                        name="name"
-                                        value={newRestaurant.name}
-                                        onChange={handleInputChange}
-                                        className="w-full px-3 py-2 border rounded-md bg-white border-gray-300 dark:bg-transparent dark:border-[#947198] dark:placeholder:text-[#684F6A]"
-                                    />
-                                </div>
-                                <div>
-                                    <label htmlFor="location" className="block text-sm font-medium mb-1">Location</label>
-                                    <input
-                                        type="text"
-                                        id="location"
-                                        name="location"
-                                        value={newRestaurant.location}
-                                        onChange={handleInputChange}
-                                        className="w-full px-3 py-2 border rounded-md bg-white border-gray-300 dark:bg-transparent dark:border-[#947198] dark:placeholder:text-[#684F6A]"
-                                    />
-                                </div>
-                                <div>
-                                    <label htmlFor="contactNumber" className="block text-sm font-medium mb-1">Contact Number</label>
-                                    <input
-                                        type="tel"
-                                        id="contactNumber"
-                                        name="contactNumber"
-                                        value={newRestaurant.contactNumber}
-                                        onChange={handleInputChange}
-                                        className="w-full px-3 py-2 border rounded-md bg-white border-gray-300 dark:bg-transparent dark:border-[#947198] dark:placeholder:text-[#684F6A]"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Image</label>
-                                    <div
-                                        onDragOver={handleDragOver}
-                                        onDrop={handleDrop}
-                                        className="border-2 border-dashed rounded-md p-4 text-center cursor-pointer dark:bg-transparent dark:border-[#947198] dark:placeholder:text-[#684F6A]"
-                                        onClick={() => fileInputRef.current?.click()}
-                                    >
-                                        {newRestaurant.coverImage ? (
-                                            <img src={newRestaurant.coverImage} alt="Restaurant cover" width={200} height={100} className="mx-auto" />
-                                        ) : (
-                                            <p>Drag a JPEG image here or click to select a JPEG image file</p>
-                                        )}
-                                    </div>
-                                    <input
-                                        type="file"
-                                        ref={fileInputRef}
-                                        accept="image/jpeg"
-                                        className="hidden"
-                                        onChange={handleImageUpload}
-                                    />
-                                </div>
-                                <button
-                                    onClick={handleSave}
-                                    className="w-full py-2 px-4 rounded-md bg-[#71389d] hover:bg-[#4f276d] dark:bg-[#d3a1d9] dark:hover:bg-[#947198] text-white"
-                                >
-                                    Save
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {isEditModalOpen && editingRestaurant && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-                        <div className={`bg-white dark:bg-black rounded-lg p-6 w-full max-w-md transition-colors`}>
-                            <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-2xl font-bold">Edit Restaurant</h2>
-                                <button onClick={() => setIsEditModalOpen(false)} className="text-gray-500 hover:text-gray-700">
-                                    <X className="h-6 w-6" />
-                                </button>
-                            </div>
-                            <div className="space-y-4">
-                                <div>
-                                    <label htmlFor="edit-name" className="block text-sm font-medium mb-1">Name</label>
-                                    <input
-                                        type="text"
-                                        id="edit-name"
-                                        name="name"
-                                        value={editingRestaurant.name}
-                                        onChange={(e) => handleInputChange(e, true)}
-                                        className="w-full px-3 py-2 border rounded-md bg-white border-gray-300 dark:bg-transparent dark:border-[#947198] dark:placeholder:text-[#684F6A]"
-                                    />
-                                </div>
-                                <div>
-                                    <label htmlFor="edit-location" className="block text-sm font-medium mb-1">Location</label>
-                                    <input
-                                        type="text"
-                                        id="edit-location"
-                                        name="location"
-                                        value={editingRestaurant.location}
-                                        onChange={(e) => handleInputChange(e, true)}
-                                        className="w-full px-3 py-2 border rounded-md bg-white border-gray-300 dark:bg-transparent dark:border-[#947198] dark:placeholder:text-[#684F6A]"
-                                    />
-                                </div>
-                                <div>
-                                    <label htmlFor="edit-contactNumber" className="block text-sm font-medium mb-1">Contact Number</label>
-                                    <input
-                                        type="tel"
-                                        id="edit-contactNumber"
-                                        name="contactNumber"
-                                        value={editingRestaurant.contactNumber}
-                                        onChange={(e) => handleInputChange(e, true)}
-                                        className="w-full px-3 py-2 border rounded-md bg-white border-gray-300 dark:bg-transparent dark:border-[#947198] dark:placeholder:text-[#684F6A]"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Image</label>
-                                    <div
-                                        onDragOver={handleDragOver}
-                                        onDrop={(e) => handleDrop(e, true)}
-                                        className="border-2 border-dashed rounded-md p-4 text-center cursor-pointer dark:bg-transparent dark:border-[#947198] dark:placeholder:text-[#684F6A]"
-                                        onClick={() => editFileInputRef.current?.click()}
-                                    >
-                                        {editingRestaurant.coverImage ? (
-                                            <img src={editingRestaurant.coverImage} alt="Restaurant cover" width={200} height={100} className="mx-auto" />
-                                        ) : (
-                                            <p>Drag a JPEG image here or click to select a JPEG image file</p>
-                                        )}
-                                    </div>
-                                    <input
-                                        type="file"
-                                        ref={editFileInputRef}
-                                        accept="image/jpeg"
-                                        className="hidden"
-                                        onChange={(e) => handleImageUpload(e, true)}
-                                    />
-                                </div>
-                                <button
-                                    onClick={handleUpdate}
-                                    className="w-full py-2 px-4 rounded-md bg-[#71389d] hover:bg-[#4f276d] dark:bg-[#d3a1d9] dark:hover:bg-[#947198] text-white"
-                                >
-                                    Update
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
 
                 <Footer />
             </div>
