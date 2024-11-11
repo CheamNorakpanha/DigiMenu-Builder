@@ -5,27 +5,38 @@ import Footer from '../components/restaurant/Footer'
 import ExploreRestaurants from '../components/explore/ExploreRestaurants'
 
 export default function Explore() {
-    const [darkMode, setDarkMode] = useState(false)
-    const [isProfileOpen, setIsProfileOpen] = useState(false)
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [darkMode, setDarkMode] = useState(() => {
+        // Initialize with localStorage preference or default to light mode
+        return localStorage.getItem('darkMode') === 'true';
+    });
 
     useEffect(() => {
-        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-        setDarkMode(prefersDark)
-
+        // Listen to system theme changes and apply them if there’s no saved preference
         const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        if (darkModeMediaQuery.matches) {
-            setDarkMode(false); // Set dark mode if the user prefers it
-        }
+        const handleThemeChange = (e) => {
+            if (localStorage.getItem('darkMode') === null) {
+                setDarkMode(e.matches);
+            }
+        };
+        
+        darkModeMediaQuery.addEventListener('change', handleThemeChange);
 
-    }, [])
+        return () => {
+            darkModeMediaQuery.removeEventListener('change', handleThemeChange);
+        };
+    }, []);
 
     const toggleDarkMode = () => {
-        setDarkMode(!darkMode)
-    }
+        // Toggle dark mode and save the preference in localStorage
+        const newDarkMode = !darkMode;
+        setDarkMode(newDarkMode);
+        localStorage.setItem('darkMode', newDarkMode.toString());
+    };
 
     return (
         <div className={`${darkMode ? 'dark' : ''}`}>
-            <div className={`first-line:flex flex-col min-h-screen bg-white dark:bg-black text-gray-900 dark:text-white transition-colors`}>
+            <div className="flex flex-col min-h-screen bg-white dark:bg-black text-gray-900 dark:text-white transition-colors">
                 <Header
                     darkMode={darkMode}
                     toggleDarkMode={toggleDarkMode}
@@ -34,11 +45,11 @@ export default function Explore() {
                 />
 
                 <main className="flex-grow container mx-auto px-6 py-8">
-                        <ExploreRestaurants allRestaurants={allRestaurants} />
+                    <ExploreRestaurants allRestaurants={allRestaurants} />
                 </main>
 
                 <Footer />
             </div>
         </div>
-    )
+    );
 }

@@ -7,22 +7,33 @@ import { menuItems, popular, otherSections } from '../components/menu/menuData';
 
 export default function Menu() {
     const [activeSection, setActiveSection] = useState('Popular')
-    const [darkMode, setDarkMode] = useState(false)
+    const [darkMode, setDarkMode] = useState(() => {
+        // Initialize with localStorage preference or default to light mode
+        return localStorage.getItem('darkMode') === 'true';
+    });
 
     useEffect(() => {
-        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-        setDarkMode(prefersDark)
-
+        // Listen to system theme changes and apply them if there’s no saved preference
         const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        if (darkModeMediaQuery.matches) {
-            setDarkMode(false);
-        }
-        darkModeMediaQuery.addEventListener('change', e => setDarkMode(e.matches));
+        const handleThemeChange = (e) => {
+            if (localStorage.getItem('darkMode') === null) {
+                setDarkMode(e.matches);
+            }
+        };
+        
+        darkModeMediaQuery.addEventListener('change', handleThemeChange);
+
+        return () => {
+            darkModeMediaQuery.removeEventListener('change', handleThemeChange);
+        };
     }, [])
 
     const toggleDarkMode = () => {
-        setDarkMode(!darkMode)
-    }
+        // Toggle dark mode and save the preference in localStorage
+        const newDarkMode = !darkMode;
+        setDarkMode(newDarkMode);
+        localStorage.setItem('darkMode', newDarkMode.toString());
+    };
 
     return (
         <div className={`${darkMode ? 'dark' : ''}`}>

@@ -10,7 +10,10 @@ import Footer from '../components/home/Footer';
 
 export default function Home() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [darkMode, setDarkMode] = useState(false);
+    const [darkMode, setDarkMode] = useState(() => {
+        // Initialize with localStorage preference or default to light mode
+        return localStorage.getItem('darkMode') === 'true';
+    });
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -19,20 +22,31 @@ export default function Home() {
         };
         checkAuth();
 
+        // Listen to system theme changes and apply them if there’s no saved preference
         const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        if (darkModeMediaQuery.matches) {
-            setDarkMode(false);
-        }
-        darkModeMediaQuery.addEventListener('change', e => setDarkMode(e.matches));
+        const handleThemeChange = (e) => {
+            if (localStorage.getItem('darkMode') === null) {
+                setDarkMode(e.matches);
+            }
+        };
+        
+        darkModeMediaQuery.addEventListener('change', handleThemeChange);
+
+        return () => {
+            darkModeMediaQuery.removeEventListener('change', handleThemeChange);
+        };
     }, []);
+
+    const toggleDarkMode = () => {
+        // Toggle dark mode and save the preference in localStorage
+        const newDarkMode = !darkMode;
+        setDarkMode(newDarkMode);
+        localStorage.setItem('darkMode', newDarkMode.toString());
+    };
 
     const handleLogin = (provider: 'github' | 'google') => {
         console.log(`Logging in with ${provider}`);
         setIsAuthenticated(true);
-    };
-
-    const toggleDarkMode = () => {
-        setDarkMode(!darkMode);
     };
 
     return (

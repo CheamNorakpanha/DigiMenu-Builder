@@ -6,7 +6,9 @@ import { Link } from 'react-router-dom'
 import QRCode from 'qrcode'
 
 export default function Dashboard() {
-    const [darkMode, setDarkMode] = useState(false)
+    const previewUrl = 'https://digimenu.com/restaurant/example/preview'
+    const publishedUrl = 'http://localhost:3000/menu'
+
     const [isProfileOpen, setIsProfileOpen] = useState(false)
     const [isPublishModalOpen, setIsPublishModalOpen] = useState(false)
     const [isPublished, setIsPublished] = useState(false)
@@ -14,19 +16,33 @@ export default function Dashboard() {
     const [copiedUrl, setCopiedUrl] = useState<string | null>(null)
     const [showCopyNotification, setShowCopyNotification] = useState(false)
     const copyTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-
-    const previewUrl = 'https://digimenu.com/restaurant/example/preview'
-    const publishedUrl = 'http://localhost:3000/menu'
+    const [darkMode, setDarkMode] = useState(() => {
+        // Initialize with localStorage preference or default to light mode
+        return localStorage.getItem('darkMode') === 'true';
+    });
 
     useEffect(() => {
-        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-        setDarkMode(prefersDark)
-
+        // Listen to system theme changes and apply them if there’s no saved preference
         const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        if (darkModeMediaQuery.matches) {
-            setDarkMode(false); // Set dark mode if the user prefers it
-        }
-    }, [])
+        const handleThemeChange = (e) => {
+            if (localStorage.getItem('darkMode') === null) {
+                setDarkMode(e.matches);
+            }
+        };
+        
+        darkModeMediaQuery.addEventListener('change', handleThemeChange);
+
+        return () => {
+            darkModeMediaQuery.removeEventListener('change', handleThemeChange);
+        };
+    }, []);
+
+    const toggleDarkMode = () => {
+        // Toggle dark mode and save the preference in localStorage
+        const newDarkMode = !darkMode;
+        setDarkMode(newDarkMode);
+        localStorage.setItem('darkMode', newDarkMode.toString());
+    };
 
     useEffect(() => {
         if (isPublished) {
@@ -41,10 +57,6 @@ export default function Dashboard() {
             }
         }
     }, [])
-
-    const toggleDarkMode = () => {
-        setDarkMode(!darkMode)
-    }
 
     const generateQRCode = async () => {
         try {
