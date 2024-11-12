@@ -29,7 +29,7 @@ export default function Home() {
                 setDarkMode(e.matches);
             }
         };
-        
+
         darkModeMediaQuery.addEventListener('change', handleThemeChange);
 
         return () => {
@@ -53,17 +53,31 @@ export default function Home() {
         <div className={`${darkMode ? 'dark' : ''}`}>
             <div className="flex flex-col min-h-screen">
 
+                {/* Navigation Bar */}
                 <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 
+                {/* Main content area where different sections of the homepage are rendered */}
                 <main className="flex-1">
+                    {/* Welcome Section */}
                     <WelcomeSection isAuthenticated={isAuthenticated} handleLogin={handleLogin} />
+
+                    {/* How It Works Section */}
                     <HowItWorksSection />
+
+                    {/* See It In Action Section */}
                     <SeeItInActionSection />
+
+                    {/* Why DigiMenu Builder Section */}
                     <WhyDigiMenuBuilderSection />
+
+                    {/* Pricing Section */}
                     <PricingSection />
+
+                    {/* ContactSection */}
                     <ContactSection />
                 </main>
 
+                {/* Footer */}
                 <Footer />
             </div>
         </div>

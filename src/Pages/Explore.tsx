@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { allRestaurants } from '../components/explore/ExploreRestaurantConfig'
-import Header from '../components/restaurant/Header'
-import Footer from '../components/restaurant/Footer'
+import Header from '../components/Header'
+import Footer from '../components/Footer'
 import ExploreRestaurants from '../components/explore/ExploreRestaurants'
 
 export default function Explore() {
@@ -37,17 +37,20 @@ export default function Explore() {
     return (
         <div className={`${darkMode ? 'dark' : ''}`}>
             <div className="flex flex-col min-h-screen bg-white dark:bg-black text-gray-900 dark:text-white transition-colors">
+                {/* Header NavBar */}
                 <Header
                     darkMode={darkMode}
                     toggleDarkMode={toggleDarkMode}
                     isProfileOpen={isProfileOpen}
                     setIsProfileOpen={setIsProfileOpen}
                 />
-
+                
+                {/* Explore Restaurants */}
                 <main className="flex-grow container mx-auto px-6 py-8">
                     <ExploreRestaurants allRestaurants={allRestaurants} />
                 </main>
 
+                {/* Footer */}
                 <Footer />
             </div>
         </div>

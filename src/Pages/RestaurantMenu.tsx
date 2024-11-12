@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
-import Footer from '../components/menu/Footer'
-import HeroSection from '../components/menu/HeroSection'
-import MenuNavigation from '../components/menu/MenuNavigation'
-import MenuContent from '../components/menu/MenuContent'
-import { menuItems, popular, otherSections } from '../components/menu/menuData';
+import Footer from '../components/restaurantMenu/Footer'
+import HeroSection from '../components/restaurantMenu/HeroSection'
+import MenuNavigation from '../components/restaurantMenu/MenuNavigation'
+import MenuContent from '../components/restaurantMenu/MenuContent'
+import { menuItems, popular, otherSections } from '../components/restaurantMenu/menuData';
 
 export default function Menu() {
     const [activeSection, setActiveSection] = useState('Popular')
@@ -59,6 +59,7 @@ export default function Menu() {
                     />
                 </main>
 
+                {/* Footer */}
                 <Footer />
             </div>
         </div>

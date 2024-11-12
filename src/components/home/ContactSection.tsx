@@ -19,7 +19,7 @@ export default function ContactSection() {
                                     type="text"
                                     id="name"
                                     name="name"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none dark:bg-zinc-900 dark:border-[#d3a1d9] dark:text-white"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm dark:bg-zinc-900 dark:border-[#d3a1d9] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#764ab3] dark:focus:ring-[#d3a1d9] focus:border-transparent"
                                     placeholder="Your name"
                                 />
                             </div>
@@ -29,7 +29,7 @@ export default function ContactSection() {
                                     type="email"
                                     id="email"
                                     name="email"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none dark:bg-zinc-900 dark:border-[#d3a1d9] dark:text-white"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm dark:bg-zinc-900 dark:border-[#d3a1d9] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#764ab3] dark:focus:ring-[#d3a1d9] focus:border-transparent"
                                     placeholder="you@example.com"
                                 />
                             </div>
@@ -39,7 +39,7 @@ export default function ContactSection() {
                                     id="message"
                                     name="message"
                                     rows={4}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none dark:bg-zinc-900 dark:border-[#d3a1d9] dark:text-white"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm dark:bg-zinc-900 dark:border-[#d3a1d9] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#764ab3] dark:focus:ring-[#d3a1d9] focus:border-transparent"
                                     placeholder="Your message"
                                 ></textarea>
                             </div>

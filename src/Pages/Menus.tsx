@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { MoreVertical, Plus, Pencil, Trash, ChevronDown, X, ImageIcon, Eye, EyeOff} from 'lucide-react'
+import { MoreVertical, Plus, Pencil, Trash, ChevronDown, X, ImageIcon } from 'lucide-react'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import PublishModal from '../components/dashboard/PublishModal'
 import QRCode from 'qrcode'
+import MenusBreadcrumb from '../components/menus/MenusBreadcrumb'
 
 interface MenuItem {
     id: string
@@ -20,7 +20,7 @@ interface MenuCategory {
     items: MenuItem[]
 }
 
-export default function MenusPage() {
+export default function Menus() {
     const [categories, setCategories] = useState<MenuCategory[]>([
         {
             id: '1',
@@ -230,7 +230,7 @@ export default function MenusPage() {
             console.error('Error generating QR code:', err)
         }
     }
-    
+
     const handleCopyUrl = async (url: string) => {
         try {
             await navigator.clipboard.writeText(url)
@@ -271,33 +271,10 @@ export default function MenusPage() {
                 {/* Main Content */}
                 <main className="container mx-auto px-4 py-8">
                     {/* Breadcrumb */}
-                    <div className="mb-6 flex items-center justify-between">
-                        <div>
-                            <nav className="flex items-center space-x-2 text-md text-gray-600 dark:text-white">
-                                <Link to="/restaurant" className="hover:underline hover:text-[#d3a1d9] dark:hover:text-[#947198] transition-colors">
-                                    Restaurant
-                                </Link>
-                                <span>/</span>
-                                <Link to="/restaurant/dashboard-new-york-beef-burger" className="hover:underline hover:text-[#d3a1d9] dark:hover:text-[#947198] transition-colors">
-                                    New York Beef Burger (Tonle Basak)
-                                </Link>
-                                <span>/</span>
-                                <span>Menu</span>
-                            </nav>
-                        </div>
-                        <button
-                            onClick={() => setIsPublishModalOpen(true)}
-                            className={`flex justify-between items-center ml-auto px-4 py-2 rounded-lg ${isPublished
-                                ? 'bg-[#71389d] hover:bg-[#4f276d] dark:bg-[#9f6ea3] dark:hover:bg-[#624d66]'
-                                : 'bg-[#b883e3]/75 hover:bg-[#9c6dae] dark:bg-[#d3a1d9] dark:hover:bg-[#947198]'
-                                } text-white`}
-                        >
-                            <div className="flex items-center">
-                                {isPublished ? <Eye className="mr-2 h-5 w-5" /> : <EyeOff className="mr-2 h-5 w-5" />}
-                                {isPublished ? 'Published' : 'Not Published'}
-                            </div>
-                        </button>
-                    </div>
+                    <MenusBreadcrumb
+                        isPublished={isPublished}
+                        setIsPublishModalOpen={setIsPublishModalOpen}
+                    />
 
                     <div className="flex gap-8">
                         {/* Categories Sidebar */}
@@ -460,14 +437,14 @@ export default function MenusPage() {
                                     <div className="mb-4">
                                         <label className="block mb-2">
                                             <span className="text-gray-700">Name</span>
-                                            <span className="text-red-500 ml-1">*</span>
+                                            <span className="text-[#764ab3] ml-1">*</span>
                                         </label>
                                         <input
                                             type="text"
                                             value={newItem.name}
                                             onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
                                             placeholder="Item Name"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#764ab3] focus:border-transparent"
                                             required
                                         />
                                     </div>
@@ -481,7 +458,7 @@ export default function MenusPage() {
                                             value={newItem.price}
                                             onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
                                             placeholder="$10.00"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#764ab3] focus:border-transparent"
                                             required
                                         />
                                     </div>
@@ -492,7 +469,7 @@ export default function MenusPage() {
                                         <textarea
                                             value={newItem.description}
                                             onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#764ab3] focus:border-transparent"
                                             rows={4}
                                         />
                                     </div>
@@ -504,14 +481,14 @@ export default function MenusPage() {
                                             onClick={handleImageClick}
                                             onDragOver={(e) => e.preventDefault()}
                                             onDrop={handleImageDrop}
-                                            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-red-500"
+                                            className="border-2 border-dashed border-[#764ab3] rounded-lg p-8 text-center cursor-pointer"
                                         >
                                             {newItem.image ? (
                                                 <img src={newItem.image} alt="Preview" width={200} height={200} className="mx-auto rounded-lg" />
                                             ) : (
                                                 <>
-                                                    <ImageIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                                                    <p className="text-sm text-gray-500">
+                                                    <ImageIcon className="mx-auto h-12 w-12 text-[#764ab3] mb-4" />
+                                                    <p className="text-sm text-[#764ab3]">
                                                         Drag a jpeg image here or click to select a jpeg image file
                                                     </p>
                                                 </>
@@ -672,18 +649,18 @@ export default function MenusPage() {
 
                 {/* Publish Modal */}
                 <PublishModal
-                        isOpen={isPublishModalOpen}
-                        onClose={() => setIsPublishModalOpen(false)}
-                        isPublished={isPublished}
-                        setIsPublished={setIsPublished}
-                        publishedUrl={publishedUrl}
-                        previewUrl={previewUrl}
-                        qrCodeUrl={qrCodeUrl}
-                        handleCopyUrl={handleCopyUrl}
-                        handleDownloadQR={handleDownloadQR}
-                        showCopyNotification={showCopyNotification}
-                        copiedUrl={copiedUrl}
-                    />
+                    isOpen={isPublishModalOpen}
+                    onClose={() => setIsPublishModalOpen(false)}
+                    isPublished={isPublished}
+                    setIsPublished={setIsPublished}
+                    publishedUrl={publishedUrl}
+                    previewUrl={previewUrl}
+                    qrCodeUrl={qrCodeUrl}
+                    handleCopyUrl={handleCopyUrl}
+                    handleDownloadQR={handleDownloadQR}
+                    showCopyNotification={showCopyNotification}
+                    copiedUrl={copiedUrl}
+                />
 
                 {/* Footer */}
                 <Footer />

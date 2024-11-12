@@ -22,7 +22,7 @@ function MyRestaurants({ restaurants, setIsModalOpen, activeDropdown, setActiveD
                 {restaurants.map((restaurant) => (
                     <div className="bg-white dark:bg-black rounded-lg shadow-md overflow-hidden relative border border-gray-500 dark:border-[#947198]" key={restaurant.id}>
                         {/* Link wrapper for navigating to restaurant dashboard */}
-                        <Link to={`/restaurant/dashboard`} className="block">
+                        <Link to={`/restaurant/dashboard-new-york-beef-burger`} className="block">
                             <img
                                 src={restaurant.coverImage}
                                 alt={`${restaurant.name} cover`}

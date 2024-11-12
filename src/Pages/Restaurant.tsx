@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
-import { X } from 'lucide-react'
-import Header from '../components/restaurant/Header'
-import Footer from '../components/restaurant/Footer'
+import Header from '../components/Header'
+import Footer from '../components/Footer'
 import MyRestaurants from '../components/restaurant/MyRestaurants'
+import AddRestaurantModal from '../components/restaurant/AddRestaurantModal'
+import EditRestaurantModal from '../components/restaurant/EditRestaurantModal'
 
 type RestaurantData = {
     id: string
@@ -25,7 +26,6 @@ export default function Restaurant() {
     const [editingRestaurant, setEditingRestaurant] = useState<RestaurantData | null>(null)
     const [restaurants, setRestaurants] = useState<RestaurantData[]>([])
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
-    const fileInputRef = useRef<HTMLInputElement>(null)
     const editFileInputRef = useRef<HTMLInputElement>(null)
     const dropdownRef = useRef<HTMLDivElement>(null)
     const [darkMode, setDarkMode] = useState(() => {
@@ -41,7 +41,7 @@ export default function Restaurant() {
                 setDarkMode(e.matches);
             }
         };
-        
+
         darkModeMediaQuery.addEventListener('change', handleThemeChange);
 
         return () => {
@@ -137,6 +137,7 @@ export default function Restaurant() {
     return (
         <div className={`${darkMode ? 'dark' : ''}`}>
             <div className={`first-line:flex flex-col min-h-screen bg-white dark:bg-black text-gray-900 dark:text-white transition-colors`}>
+                {/* Header NavBar */}
                 <Header
                     darkMode={darkMode}
                     toggleDarkMode={toggleDarkMode}
@@ -144,6 +145,7 @@ export default function Restaurant() {
                     setIsProfileOpen={setIsProfileOpen}
                 />
 
+                {/* MyRestaurants Section */}
                 <main className="flex-grow container mx-auto px-6 py-8">
                     <MyRestaurants
                         restaurants={restaurants}
@@ -156,158 +158,36 @@ export default function Restaurant() {
                     />
                 </main>
 
+                {/* AddRestaurant Modal */}
                 {isModalOpen && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-                        <div className={`bg-white dark:bg-black rounded-lg p-6 w-full max-w-md`}>
-                            <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-2xl font-bold">Add Restaurant</h2>
-                                <button onClick={() => setIsModalOpen(false)} className="text-gray-500 hover:text-gray-700">
-                                    <X className="h-6 w-6" />
-                                </button>
-                            </div>
-                            <div className="space-y-4">
-                                <div>
-                                    <label htmlFor="name" className="block text-sm font-medium mb-1">Name</label>
-                                    <input
-                                        type="text"
-                                        id="name"
-                                        name="name"
-                                        value={newRestaurant.name}
-                                        onChange={handleInputChange}
-                                        className="w-full px-3 py-2 border rounded-md bg-white border-gray-300 dark:bg-transparent dark:border-[#947198] dark:placeholder:text-[#684F6A]"
-                                    />
-                                </div>
-                                <div>
-                                    <label htmlFor="location" className="block text-sm font-medium mb-1">Location</label>
-                                    <input
-                                        type="text"
-                                        id="location"
-                                        name="location"
-                                        value={newRestaurant.location}
-                                        onChange={handleInputChange}
-                                        className="w-full px-3 py-2 border rounded-md bg-white border-gray-300 dark:bg-transparent dark:border-[#947198] dark:placeholder:text-[#684F6A]"
-                                    />
-                                </div>
-                                <div>
-                                    <label htmlFor="contactNumber" className="block text-sm font-medium mb-1">Contact Number</label>
-                                    <input
-                                        type="tel"
-                                        id="contactNumber"
-                                        name="contactNumber"
-                                        value={newRestaurant.contactNumber}
-                                        onChange={handleInputChange}
-                                        className="w-full px-3 py-2 border rounded-md bg-white border-gray-300 dark:bg-transparent dark:border-[#947198] dark:placeholder:text-[#684F6A]"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Image</label>
-                                    <div
-                                        onDragOver={handleDragOver}
-                                        onDrop={handleDrop}
-                                        className="border-2 border-dashed rounded-md p-4 text-center cursor-pointer dark:bg-transparent dark:border-[#947198] dark:placeholder:text-[#684F6A]"
-                                        onClick={() => fileInputRef.current?.click()}
-                                    >
-                                        {newRestaurant.coverImage ? (
-                                            <img src={newRestaurant.coverImage} alt="Restaurant cover" width={200} height={100} className="mx-auto" />
-                                        ) : (
-                                            <p>Drag a JPEG image here or click to select a JPEG image file</p>
-                                        )}
-                                    </div>
-                                    <input
-                                        type="file"
-                                        ref={fileInputRef}
-                                        accept="image/jpeg"
-                                        className="hidden"
-                                        onChange={handleImageUpload}
-                                    />
-                                </div>
-                                <button
-                                    onClick={handleSave}
-                                    className="w-full py-2 px-4 rounded-md bg-[#71389d] hover:bg-[#4f276d] dark:bg-[#d3a1d9] dark:hover:bg-[#947198] text-white"
-                                >
-                                    Save
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    <AddRestaurantModal
+                        isOpen={isModalOpen}
+                        onClose={() => setIsModalOpen(false)}
+                        newRestaurant={newRestaurant}
+                        handleInputChange={handleInputChange}
+                        handleSave={handleSave}
+                        handleDragOver={handleDragOver}
+                        handleDrop={handleDrop}
+                        handleImageUpload={handleImageUpload}
+                    />
                 )}
 
+                {/* EditRestaurant Modal */}
                 {isEditModalOpen && editingRestaurant && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-                        <div className={`bg-white dark:bg-black rounded-lg p-6 w-full max-w-md transition-colors`}>
-                            <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-2xl font-bold">Edit Restaurant</h2>
-                                <button onClick={() => setIsEditModalOpen(false)} className="text-gray-500 hover:text-gray-700">
-                                    <X className="h-6 w-6" />
-                                </button>
-                            </div>
-                            <div className="space-y-4">
-                                <div>
-                                    <label htmlFor="edit-name" className="block text-sm font-medium mb-1">Name</label>
-                                    <input
-                                        type="text"
-                                        id="edit-name"
-                                        name="name"
-                                        value={editingRestaurant.name}
-                                        onChange={(e) => handleInputChange(e, true)}
-                                        className="w-full px-3 py-2 border rounded-md bg-white border-gray-300 dark:bg-transparent dark:border-[#947198] dark:placeholder:text-[#684F6A]"
-                                    />
-                                </div>
-                                <div>
-                                    <label htmlFor="edit-location" className="block text-sm font-medium mb-1">Location</label>
-                                    <input
-                                        type="text"
-                                        id="edit-location"
-                                        name="location"
-                                        value={editingRestaurant.location}
-                                        onChange={(e) => handleInputChange(e, true)}
-                                        className="w-full px-3 py-2 border rounded-md bg-white border-gray-300 dark:bg-transparent dark:border-[#947198] dark:placeholder:text-[#684F6A]"
-                                    />
-                                </div>
-                                <div>
-                                    <label htmlFor="edit-contactNumber" className="block text-sm font-medium mb-1">Contact Number</label>
-                                    <input
-                                        type="tel"
-                                        id="edit-contactNumber"
-                                        name="contactNumber"
-                                        value={editingRestaurant.contactNumber}
-                                        onChange={(e) => handleInputChange(e, true)}
-                                        className="w-full px-3 py-2 border rounded-md bg-white border-gray-300 dark:bg-transparent dark:border-[#947198] dark:placeholder:text-[#684F6A]"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Image</label>
-                                    <div
-                                        onDragOver={handleDragOver}
-                                        onDrop={(e) => handleDrop(e, true)}
-                                        className="border-2 border-dashed rounded-md p-4 text-center cursor-pointer dark:bg-transparent dark:border-[#947198] dark:placeholder:text-[#684F6A]"
-                                        onClick={() => editFileInputRef.current?.click()}
-                                    >
-                                        {editingRestaurant.coverImage ? (
-                                            <img src={editingRestaurant.coverImage} alt="Restaurant cover" width={200} height={100} className="mx-auto" />
-                                        ) : (
-                                            <p>Drag a JPEG image here or click to select a JPEG image file</p>
-                                        )}
-                                    </div>
-                                    <input
-                                        type="file"
-                                        ref={editFileInputRef}
-                                        accept="image/jpeg"
-                                        className="hidden"
-                                        onChange={(e) => handleImageUpload(e, true)}
-                                    />
-                                </div>
-                                <button
-                                    onClick={handleUpdate}
-                                    className="w-full py-2 px-4 rounded-md bg-[#71389d] hover:bg-[#4f276d] dark:bg-[#d3a1d9] dark:hover:bg-[#947198] text-white"
-                                >
-                                    Update
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    <EditRestaurantModal
+                        isOpen={isEditModalOpen}
+                        editingRestaurant={editingRestaurant}
+                        setIsEditModalOpen={setIsEditModalOpen}
+                        handleInputChange={handleInputChange}
+                        handleDragOver={handleDragOver}
+                        handleDrop={handleDrop}
+                        handleImageUpload={handleImageUpload}
+                        handleUpdate={handleUpdate}
+                        editFileInputRef={editFileInputRef}
+                    />
                 )}
 
+                {/* Footer */}
                 <Footer />
             </div>
         </div>
