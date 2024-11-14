@@ -26,40 +26,52 @@ export default function AddRestaurantModal({
                 </div>
                 <div className="space-y-4">
                     <div>
-                        <label htmlFor="name" className="block text-sm font-medium mb-1">Name</label>
+                        <label className="block mb-2 text-sm font-medium">
+                            <span className="text-gray-700 dark:text-white">Name</span>
+                            <span className="text-[#764ab3] dark:text-[#947198] ml-1">*</span>
+                        </label>
                         <input
                             type="text"
                             id="name"
                             name="name"
+                            placeholder="Restaurant Name"
                             value={newRestaurant.name}
                             onChange={handleInputChange}
                             className="w-full px-3 py-2 border rounded-md bg-white border-gray-300 dark:bg-transparent dark:border-[#947198] dark:placeholder:text-[#684F6A] focus:outline-none focus:ring-2 focus:ring-[#764ab3] dark:focus:ring-[#d3a1d9] focus:border-transparent"
                         />
                     </div>
                     <div>
-                        <label htmlFor="location" className="block text-sm font-medium mb-1">Location</label>
+                        <label className="block mb-2 text-sm font-medium">
+                            <span className="text-gray-700 dark:text-white">Location</span>
+                            <span className="text-[#764ab3] dark:text-[#947198] ml-1">*</span>
+                        </label>
                         <input
                             type="text"
                             id="location"
                             name="location"
+                            placeholder="Location"
                             value={newRestaurant.location}
                             onChange={handleInputChange}
                             className="w-full px-3 py-2 border rounded-md bg-white border-gray-300 dark:bg-transparent dark:border-[#947198] dark:placeholder:text-[#684F6A] focus:outline-none focus:ring-2 focus:ring-[#764ab3] dark:focus:ring-[#d3a1d9] focus:border-transparent"
                         />
                     </div>
                     <div>
-                        <label htmlFor="contactNumber" className="block text-sm font-medium mb-1">Contact Number</label>
+                        <label className="block mb-2 text-sm font-medium">
+                            <span className="text-gray-700 dark:text-white">Contact Number</span>
+                            <span className="text-[#764ab3] dark:text-[#947198] ml-1">*</span>
+                        </label>
                         <input
                             type="tel"
                             id="contactNumber"
                             name="contactNumber"
+                            placeholder="Contact Number"
                             value={newRestaurant.contactNumber}
                             onChange={handleInputChange}
                             className="w-full px-3 py-2 border rounded-md bg-white border-gray-300 dark:bg-transparent dark:border-[#947198] dark:placeholder:text-[#684F6A] focus:outline-none focus:ring-2 focus:ring-[#764ab3] dark:focus:ring-[#d3a1d9] focus:border-transparent"
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium mb-1">Image</label>
+                        <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-white">Image</label>
                         <div
                             onDragOver={handleDragOver}
                             onDrop={handleDrop}
