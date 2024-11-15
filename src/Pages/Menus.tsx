@@ -1,11 +1,17 @@
 import { useState, useRef, useEffect } from 'react'
-import { MoreVertical, Plus, Pencil, Trash, ChevronDown, X, ImageIcon, Edit } from 'lucide-react'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import MenusBreadcrumb from '../components/menus/MenusBreadcrumb'
 import PublishModal from '../components/dashboard/PublishModal'
 import QRCode from 'qrcode'
 import DeleteConfirmationModal from '../components/menus/DeleteConfirmationModal'
+import UpdateMenuItemModal from '../components/menus/UpdateMenuItemModal'
+import AddMenuItemModal from '../components/menus/AddMenuItemModal'
+import DeleteCategoryModal from '../components/menus/DeleteCategoryModal'
+import EditCategoryModal from '../components/menus/EditCategoryModal'
+import AddMenuModal from '../components/menus/AddMenuModal'
+import CategoryItemList from '../components/menus/CategoryItemList'
+import CategorySidebar from '../components/menus/CategorySidebar'
 
 
 interface MenuItem {
@@ -61,7 +67,6 @@ export default function MenusPage() {
     const [deletingCategory, setDeletingCategory] = useState<MenuCategory | null>(null)
     const [openCategoryMenu, setOpenCategoryMenu] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
-    const editFileInputRef = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -303,440 +308,81 @@ export default function MenusPage() {
 
                     <div className="flex gap-8">
                         {/* Categories Sidebar */}
-                        <div className="w-64 flex-shrink-0">
-                            <div className="space-y-2">
-                                {categories.map((category) => (
-                                    <div
-                                        key={category.id}
-                                        className={`w-full flex items-center justify-between p-4 rounded-lg text-left border ${selectedCategory === category.id
-                                            ? 'bg-[#764ab3]/20 text-[#764ab3] border-[#764ab3] dark:bg-[#d3a1d9] dark:text-white dark:border-[#d3a1d9]'
-                                            : 'bg-gray-50 hover:bg-gray-200 border-gray-200 dark:bg-transparent dark:text-[#947198] dark:border-[#947198]'
-                                            }`}
-                                        onClick={() => setSelectedCategory(category.id)}
-                                    >
-                                        <div className="flex items-center">
-                                            <span className="text-lg">{category.name}</span>
-                                        </div>
-                                        <div className="relative category-menu">
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setOpenCategoryMenu(openCategoryMenu === category.id ? null : category.id);
-                                                }}
-                                                className="p-1 rounded-full"
-                                            >
-                                                <MoreVertical className="h-5 w-5 text-gray-400 dark:text-white" />
-                                            </button>
-                                            {openCategoryMenu === category.id && (
-                                                <div className="absolute right-0 mt-2 w-48 p-1 rounded-lg shadow-lg z-10 bg-white dark:bg-black border border-gray-400 dark:border-[#947198]">
-                                                    <div className="py-1">
-                                                        <button
-                                                            onClick={() => handleEditCategory(category)}
-                                                            className="flex items-center w-full px-4 py-2 text-sm rounded text-gray-600 dark:text-[#d3a1d9] hover:bg-red-100 dark:hover:bg-fuchsia-300/25"
-                                                        >
-                                                            <Edit className="mr-2 h-4 w-4" />
-                                                            Edit
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDeleteCategory(category)}
-                                                            className="flex items-center w-full px-4 py-2 text-sm rounded text-red-500 dark:text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50"
-                                                        >
-                                                            <Trash className="mr-2 h-4 w-4 text-red-500 dark:text-red-600" />
-                                                            Delete
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                            <button
-                                onClick={() => setIsAddMenuOpen(true)}
-                                className="w-full p-4 mt-2 text-[#764ab3] dark:text-[#947198] bg-transparent dark:bg-transparent rounded-lg flex items-center justify-center hover:bg-[#764ab3]/20 dark:hover:bg-[#947198]/20"
-                            >
-                                <Plus className="h-5 w-5 mr-2" />
-                                Add Menu
-                            </button>
-                        </div>
+                        <CategorySidebar
+                            categories={categories}
+                            selectedCategory={selectedCategory}
+                            setSelectedCategory={setSelectedCategory}
+                            handleEditCategory={handleEditCategory}
+                            handleDeleteCategory={handleDeleteCategory}
+                            setIsAddMenuOpen={setIsAddMenuOpen}
+                            openCategoryMenu={openCategoryMenu}
+                            setOpenCategoryMenu={setOpenCategoryMenu}
+                        />
 
                         {/* Menu Items */}
-                        <div className="flex-1">
-                            <div className="bg-gray-300 dark:bg-fuchsia-300 bg-opacity-10 dark:bg-opacity-10 rounded-lg p-6 border border-gray-200 dark:border-[#947198]">
-                                <div className="flex items-center justify-between mb-6">
-                                    <h2 className="text-xl font-semibold text-black dark:text-white">
-                                        {categories.find(c => c.id === selectedCategory)?.name}
-                                    </h2>
-                                    <button className="p-2 rounded-lg">
-                                        <ChevronDown className="h-5 w-5 text-gray-400 dark:text-white" />
-                                    </button>
-                                </div>
-
-                                <div className="space-y-4">
-                                    {categories
-                                        .find(c => c.id === selectedCategory)
-                                        ?.items.map(item => (
-                                            <div
-                                                key={item.id}
-                                                className="flex items-center justify-between py-4 border-b last:border-0 border-gray-200 dark:border-[#947198]"
-                                            >
-                                                <div className="flex items-center space-x-4">
-                                                    <div className="w-16 h-16 bg-gray-50 dark:bg-transparent rounded-lg flex items-center justify-center border dark:border-[#947198]/30">
-                                                        {item.image ? (
-                                                            <img src={item.image} alt={item.name} width={64} height={64} className="rounded-lg object-cover" />
-                                                        ) : <span className="text-xs text-gray-500 dark:text-[#947198]/30">No Image</span>
-                                                        }
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="font-medium text-black dark:text-white">{item.name}</h3>
-                                                        <p className="text-gray-500 dark:text-gray-400 text-sm">{item.description}</p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center space-x-2">
-                                                    <span className="text-lg text-black dark:text-white">$ {item.price}</span>
-                                                    <button
-                                                        onClick={() => handleEditItem(item)}
-                                                        className="p-2 rounded-lg"
-                                                    >
-                                                        <Pencil className="h-4 w-4 text-gray-400 hover:text-gray-500 dark:text-white dark:hover:text-gray-300" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDeleteItem(item)}
-                                                        className="p-2 rounded-lg"
-                                                    >
-                                                        <Trash className="h-4 w-4 text-red-400 hover:text-red-600 dark:text-[#d3a1d9] dark:hover:text-fuchsia-300 " />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                </div>
-
-                                <button
-                                    onClick={() => setIsAddItemOpen(true)}
-                                    className="mt-4 flex items-center text-sm text-gray-500 hover:text-gray-700 dark:text-white dark:hover:text-gray-300"
-                                >
-                                    <Plus className="h-4 w-4 mr-1 " />
-                                    Add Item
-                                </button>
-                            </div>
-                        </div>
+                        <CategoryItemList
+                            categories={categories}
+                            selectedCategory={selectedCategory}
+                            handleEditItem={handleEditItem}
+                            handleDeleteItem={handleDeleteItem}
+                            setIsAddItemOpen={setIsAddItemOpen}
+                        />
                     </div>
                 </main>
 
                 {/* Add Menu Modal */}
                 {isAddMenuOpen && (
-                    <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center">
-                        <div className="bg-white dark:bg-black rounded-lg shadow-lg w-full max-w-md mx-4 border dark:border-[#947198]/75">
-                            <div className="p-6">
-                                <div className="flex items-center justify-between mb-6">
-                                    <h2 className="text-xl font-semibold text-black dark:text-white">Create Menu</h2>
-                                    <button
-                                        onClick={() => setIsAddMenuOpen(false)}
-                                        className="text-gray-400 hover:text-gray-600"
-                                    >
-                                        <X className="h-5 w-5" />
-                                    </button>
-                                </div>
-                                <form onSubmit={handleAddMenu}>
-                                    <div className="mb-6">
-                                        <label className="block mb-2 text-sm font-medium">
-                                            <span className="text-gray-700 dark:text-white">Name</span>
-                                            <span className="text-[#764ab3] dark:text-[#947198] ml-1">*</span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={newMenuName}
-                                            onChange={(e) => setNewMenuName(e.target.value)}
-                                            placeholder="Menu Name"
-                                            className="w-full px-3 py-2 text-black dark:text-white dark:bg-black border border-gray-300 dark:border-[#947198] rounded-md focus:outline-none focus:ring-2 focus:ring-[#764ab3] dark:focus:ring-[#947198] focus:border-transparent"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="flex justify-end">
-                                        <button
-                                            type="submit"
-                                            className="px-4 py-2 bg-[#764ab3] hover:bg-[#4f276d] dark:bg-[#d3a1d9] dark:hover:bg-[#947198] text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#764ab3] focus:border-transparent"
-                                        >
-                                            Save
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+                    <AddMenuModal
+                        newMenuName={newMenuName}
+                        setNewMenuName={setNewMenuName}
+                        setIsAddMenuOpen={setIsAddMenuOpen}
+                        handleAddMenu={handleAddMenu}
+                    />
                 )}
 
                 {/* Edit Category Modal */}
                 {isEditCategoryOpen && editingCategory && (
-                    <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center">
-                        <div className="bg-white dark:bg-black rounded-lg shadow-lg w-full max-w-md mx-4 border dark:border-[#947198]/75">
-                            <div className="p-6">
-                                <div className="flex items-center justify-between mb-6">
-                                    <h2 className="text-xl font-semibold text-black dark:text-white">Edit Category</h2>
-                                    <button
-                                        onClick={() => {
-                                            setIsEditCategoryOpen(false)
-                                            setEditingCategory(null)
-                                        }}
-                                        className="text-gray-400 hover:text-gray-600"
-                                    >
-                                        <X className="h-5 w-5" />
-                                    </button>
-                                </div>
-                                <form onSubmit={handleUpdateCategory}>
-                                    <div className="mb-6">
-                                        <label className="block mb-2 text-sm font-medium">
-                                            <span className="text-gray-700 dark:text-white">Name</span>
-                                            <span className="text-[#764ab3] dark:text-[#947198] ml-1">*</span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={editingCategory.name}
-                                            onChange={(e) => setEditingCategory({ ...editingCategory, name: e.target.value })}
-                                            className="w-full px-3 py-2 text-black dark:text-white dark:bg-black border border-gray-300 dark:border-[#947198] rounded-md focus:outline-none focus:ring-2 focus:ring-[#764ab3] dark:focus:ring-[#947198] focus:border-transparent"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="flex justify-end">
-                                        <button
-                                            type="submit"
-                                            className="px-4 py-2 bg-[#764ab3] hover:bg-[#4f276d] dark:bg-[#d3a1d9] dark:hover:bg-[#947198] text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#764ab3] focus:border-transparent"
-                                        >
-                                            Save
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+                    <EditCategoryModal
+                        editingCategory={editingCategory}
+                        setIsEditCategoryOpen={setIsEditCategoryOpen}
+                        setEditingCategory={setEditingCategory}
+                        handleUpdateCategory={handleUpdateCategory}
+                    />
                 )}
 
                 {/* Delete Category Confirmation Modal */}
                 {isDeleteCategoryOpen && deletingCategory && (
-                    <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center">
-                        <div className="bg-white dark:bg-black rounded-lg shadow-lg w-full max-w-md mx-4 border dark:border-[#947198]/75">
-                            <div className="p-6">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h2 className="text-xl font-semibold text-black dark:text-white">Delete {deletingCategory.name} category</h2>
-                                    <button
-                                        onClick={() => {
-                                            setIsDeleteCategoryOpen(false)
-                                            setDeletingCategory(null)
-                                        }}
-                                        className="text-gray-400 hover:text-gray-600"
-                                    >
-                                        <X className="h-5 w-5" />
-                                    </button>
-                                </div>
-                                <p className="text-gray-600 dark:text-white mb-6">
-                                    Are you sure you want to delete this category? This action cannot be undone and will delete all items in this category.
-                                </p>
-                                <div className="flex justify-end">
-                                    <button
-                                        onClick={confirmDeleteCategory}
-                                        className="px-4 py-2 bg-[#764ab3] hover:bg-[#4f276d] dark:bg-[#d3a1d9] dark:hover:bg-[#947198] text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#764ab3] focus:border-transparent"
-                                    >
-                                        Confirm Delete
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <DeleteCategoryModal
+                        deletingCategory={deletingCategory}
+                        setIsDeleteCategoryOpen={setIsDeleteCategoryOpen}
+                        setDeletingCategory={setDeletingCategory}
+                        confirmDeleteCategory={confirmDeleteCategory}
+                    />
                 )}
 
                 {/* Add Item Modal */}
                 {isAddItemOpen && (
-                    <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center">
-                        <div className="bg-white dark:bg-black rounded-lg shadow-lg w-full max-w-md mx-4 border dark:border-[#947198]/75">
-                            <div className="p-6">
-                                <div className="flex items-center justify-between mb-6">
-                                    <h2 className="text-xl font-semibold text-black dark:text-white">Create Menu Item</h2>
-                                    <button
-                                        onClick={() => setIsAddItemOpen(false)}
-                                        className="text-gray-400 hover:text-gray-600"
-                                    >
-                                        <X className="h-5 w-5" />
-                                    </button>
-                                </div>
-                                <form onSubmit={handleAddItem}>
-                                    <div className="mb-4">
-                                        <label className="block mb-2 text-sm font-medium">
-                                            <span className="text-gray-700 dark:text-white">Name</span>
-                                            <span className="text-[#764ab3] dark:text-[#947198] ml-1">*</span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={newItem.name}
-                                            onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-                                            placeholder="Item Name"
-                                            className="w-full px-3 py-2 text-black dark:text-white dark:bg-black border border-gray-300 dark:border-[#947198] rounded-md focus:outline-none focus:ring-2 focus:ring-[#764ab3] dark:focus:ring-[#947198] focus:border-transparent"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="mb-4">
-                                        <label className="block mb-2 text-sm font-medium">
-                                            <span className="text-gray-700 dark:text-white">Price</span>
-                                            <span className="text-[#764ab3] dark:text-[#947198] ml-1">*</span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={newItem.price}
-                                            onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
-                                            placeholder="$10.00"
-                                            className="w-full px-3 py-2 text-black dark:text-white dark:bg-black border border-gray-300 dark:border-[#947198] rounded-md focus:outline-none focus:ring-2 focus:ring-[#764ab3] dark:focus:ring-[#947198] focus:border-transparent"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="mb-4">
-                                        <label className="block mb-2 text-sm font-medium">
-                                            <span className="text-gray-700 dark:text-white">Description</span>
-                                        </label>
-                                        <textarea
-                                            value={newItem.description}
-                                            onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
-                                            className="w-full px-3 py-2 text-black dark:text-white dark:bg-black border border-gray-300 dark:border-[#947198] rounded-md focus:outline-none focus:ring-2 focus:ring-[#764ab3] dark:focus:ring-[#947198] focus:border-transparent"
-                                            rows={4}
-                                        />
-                                    </div>
-                                    <div className="mb-6">
-                                        <label className="block mb-2 text-sm font-medium">
-                                            <span className="text-gray-700 dark:text-white">Image</span>
-                                        </label>
-                                        <div
-                                            onClick={() => fileInputRef.current.click()}
-                                            onDragOver={(e) => e.preventDefault()}
-                                            onDrop={(e) => handleImageDrop(e)}
-                                            className="border-2 border-dashed border-[#764ab3] dark:border-[#947198] rounded-lg p-8 text-center cursor-pointer"
-                                        >
-                                            {newItem.image ? (
-                                                <img src={newItem.image} alt="Preview" width={200} height={200} className="mx-auto rounded-lg" />
-                                            ) : (
-                                                <>
-                                                    <ImageIcon className="mx-auto h-12 w-12 text-[#764ab3] dark:text-[#947198] mb-4" />
-                                                    <p className="text-sm text-[#764ab3] dark:text-[#947198]">
-                                                        Drag an image here or click to select an image file
-                                                    </p>
-                                                </>
-                                            )}
-                                            <input
-                                                ref={fileInputRef}
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={(e) => handleImageChange(e)}
-                                                className="hidden"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-end">
-                                        <button
-                                            type="submit"
-                                            className="px-4 py-2 bg-[#764ab3] hover:bg-[#4f276d] dark:bg-[#d3a1d9] dark:hover:bg-[#947198] text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#764ab3] focus:border-transparent"
-                                        >
-                                            Save
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+                    <AddMenuItemModal
+                        newItem={newItem}
+                        setNewItem={setNewItem}
+                        handleAddItem={handleAddItem}
+                        setIsAddItemOpen={setIsAddItemOpen}
+                        fileInputRef={fileInputRef}
+                        handleImageDrop={handleImageDrop}
+                        handleImageChange={handleImageChange}
+                    />
                 )}
 
                 {/* Edit Item Modal */}
                 {isEditItemOpen && editingItem && (
-                    <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center">
-                        <div className="bg-white dark:bg-black rounded-lg shadow-lg w-full max-w-md mx-4 border dark:border-[#947198]/75">
-                            <div className="p-6">
-                                <div className="flex items-center justify-between mb-6">
-                                    <h2 className="text-xl font-semibold text-black dark:text-white">Update Menu Item</h2>
-                                    <button
-                                        onClick={() => {
-                                            setIsEditItemOpen(false)
-                                            setEditingItem(null)
-                                        }}
-                                        className="text-gray-400 hover:text-gray-600"
-                                    >
-                                        <X className="h-5 w-5" />
-                                    </button>
-                                </div>
-                                <form onSubmit={handleUpdateItem}>
-                                    <div className="mb-4">
-                                        <label className="block mb-2 text-sm font-medium">
-                                            <span className="text-gray-700 dark:text-white">Name</span>
-                                            <span className="text-[#764ab3] dark:text-[#947198] ml-1">*</span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={editingItem.name}
-                                            onChange={(e) => setEditingItem({ ...editingItem, name: e.target.value })}
-                                            className="w-full px-3 py-2 text-black dark:text-white dark:bg-black border border-gray-300 dark:border-[#947198] rounded-md focus:outline-none focus:ring-2 focus:ring-[#764ab3] dark:focus:ring-[#947198] focus:border-transparent"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="mb-4">
-                                        <label className="block mb-2 text-sm font-medium">
-                                            <span className="text-gray-700 dark:text-white">Price</span>
-                                            <span className="text-[#764ab3] dark:text-[#947198] ml-1">*</span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={editingItem.price}
-                                            onChange={(e) => setEditingItem({ ...editingItem, price: e.target.value })}
-                                            className="w-full px-3 py-2 text-black dark:text-white dark:bg-black border border-gray-300 dark:border-[#947198] rounded-md focus:outline-none focus:ring-2 focus:ring-[#764ab3] dark:focus:ring-[#947198] focus:border-transparent"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="mb-4">
-                                        <label className="block mb-2 text-sm font-medium">
-                                            <span className="text-gray-700 dark:text-white">Description</span>
-                                        </label>
-                                        <textarea
-                                            value={editingItem.description}
-                                            onChange={(e) => setEditingItem({ ...editingItem, description: e.target.value })}
-                                            className="w-full px-3 py-2 text-black dark:text-white dark:bg-black border border-gray-300 dark:border-[#947198] rounded-md focus:outline-none focus:ring-2 focus:ring-[#764ab3] dark:focus:ring-[#947198] focus:border-transparent"
-                                            rows={4}
-                                        />
-                                    </div>
-                                    <div className="mb-6">
-                                        <label className="block mb-2">
-                                            <span className="text-gray-700 dark:text-white">Image</span>
-                                        </label>
-                                        <div
-                                            onClick={() => editFileInputRef.current.click()}
-                                            onDragOver={(e) => e.preventDefault()}
-                                            onDrop={(e) => handleImageDrop(e, true)}
-                                            className="border-2 border-dashed border-[#764ab3] dark:border-[#947198] rounded-lg p-8 text-center cursor-pointer"
-                                        >
-                                            {editingItem.image ? (
-                                                <img src={editingItem.image} alt="Preview" width={200} height={200} className="mx-auto rounded-lg" />
-                                            ) : (
-                                                <>
-                                                    <ImageIcon className="mx-auto h-12 w-12 text-[#764ab3] dark:text-[#947198] mb-4" />
-                                                    <p className="text-sm text-[#764ab3] dark:text-[#947198]">
-                                                        Drag an image here or click to select an image file
-                                                    </p>
-                                                </>
-                                            )}
-                                            <input
-                                                ref={editFileInputRef}
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={(e) => handleImageChange(e, true)}
-                                                className="hidden"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-end">
-                                        <button
-                                            type="submit"
-                                            className="px-4 py-2 bg-[#764ab3] hover:bg-[#4f276d] dark:bg-[#d3a1d9] dark:hover:bg-[#947198] text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#764ab3] focus:border-transparent"
-                                        >
-                                            Save
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+                    <UpdateMenuItemModal
+                        editingItem={editingItem}
+                        setEditingItem={setEditingItem}
+                        setIsEditItemOpen={setIsEditItemOpen}
+                        handleUpdateItem={handleUpdateItem}
+                        handleImageChange={handleImageChange}
+                        handleImageDrop={handleImageDrop}
+                    />
                 )}
 
                 {/* Delete Item Confirmation Modal */}
