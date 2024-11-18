@@ -13,7 +13,6 @@ import AddMenuModal from '../components/menus/AddMenuModal'
 import CategoryItemList from '../components/menus/CategoryItemList'
 import CategorySidebar from '../components/menus/CategorySidebar'
 
-
 interface MenuItem {
     id: string
     name: string

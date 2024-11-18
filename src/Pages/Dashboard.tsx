@@ -122,7 +122,7 @@ export default function Dashboard() {
                         </Link>
 
                         {/* Banners Section */}
-                        <Link to="/banners">
+                        <Link to="/restaurant/dashboard-new-york-beef-burger/banners">
                             <DashboardBanners />
                         </Link>
 

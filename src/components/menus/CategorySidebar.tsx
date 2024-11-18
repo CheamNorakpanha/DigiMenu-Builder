@@ -1,4 +1,3 @@
-import React from 'react';
 import { MoreVertical, Plus, Edit, Trash } from 'lucide-react';
 
 const CategorySidebar = ({

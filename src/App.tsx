@@ -6,6 +6,7 @@ import Testing from './Pages/Testing';
 import Dashboard from './Pages/Dashboard';
 import Explore from './Pages/Explore';
 import Menus from './Pages/Menus';
+import Banners from './Pages/Banners';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path='/restaurant/dashboard-new-york-beef-burger' element={<Dashboard />} />
         <Route path='/explore' element={<Explore />} />
         <Route path='/restaurant/dashboard-new-york-beef-burger/menus' element={<Menus />} />
+        <Route path='/restaurant/dashboard-new-york-beef-burger/banners' element={<Banners />} />
       </Routes>
     </Router>
   );

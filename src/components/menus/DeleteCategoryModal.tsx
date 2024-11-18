@@ -1,4 +1,3 @@
-import React from 'react';
 import { X } from 'lucide-react'; // Make sure to import or adjust the path to the X icon component
 
 const DeleteCategoryModal = ({
