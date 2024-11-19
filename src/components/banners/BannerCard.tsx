@@ -12,15 +12,16 @@ export default function BannerCard({
     return (
         <div
             key={banner.id}
-            className="relative bg-white dark:bg-black rounded-lg border border-gray-500 dark:border-[#947198] flex items-center justify-center"
+            className="relative shadow-lg rounded-lg bg-white dark:bg-gray-800 w-500 min-h-[200px] flex flex-col overflow-hidden"
         >
-            <img
-                src={banner.image}
-                alt="Banner"
-                className="w-full h-48 object-cover object-center"
-                width={400}
-                height={200}
-            />
+            <div className="w-full h-full">
+                <img
+                    src={banner.image}
+                    alt="Banner"
+                    className="w-full h-full object-cover"
+                />
+            </div>
+
             <div className="absolute top-2 right-2" ref={menuRef}>
                 <button
                     className="p-1 rounded-lg bg-white text-gray-800 dark:bg-black dark:text-gray-200"

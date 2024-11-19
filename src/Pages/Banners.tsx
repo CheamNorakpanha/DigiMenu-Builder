@@ -8,7 +8,8 @@ import QRCode from 'qrcode'
 import BannerCard from '../components/banners/BannerCard'
 import AddBannerCard from '../components/banners/AddBannerCard'
 import DeleteBannerModal from '../components/banners/DeleteBannerModalProps'
-
+import getCroppedImg from '../components/cropImage' 
+import Cropper from 'react-easy-crop';
 interface Banner {
     id: string
     image: string
@@ -26,6 +27,13 @@ export default function Banners() {
     const [openMenuId, setOpenMenuId] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const menuRef = useRef<HTMLDivElement>(null)
+
+    const [croppedImage, setCroppedImage] = useState<string | null>(null)
+    const [imageForCrop, setImageForCrop] = useState<string | null>(null)
+    const [crop, setCrop] = useState({ x: 0, y: 0 })
+    const [zoom, setZoom] = useState(1)
+    const [rotation, setRotation] = useState(0);
+    const [cropArea, setCropArea] = useState(null)
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -47,9 +55,29 @@ export default function Banners() {
     }
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        handleImageFile(file)
+                const file = e.target.files?.[0]
+                if (file && file.type.startsWith('image/jpeg')) {
+                    const reader = new FileReader()
+                    reader.onload = () => {
+                        setImageForCrop(reader.result as string) // Set the image for cropping
+                    }
+                    reader.readAsDataURL(file)
+                }
+            }
+
+    const onCropComplete = async (croppedArea: any, croppedAreaPixels: any) => {
+                setCropArea(croppedAreaPixels)
+                }
+
+    const handleCropSave = async () => {
+        if (imageForCrop && cropArea) {
+            const croppedImageUrl = await getCroppedImg(imageForCrop, cropArea)
+            setCroppedImage(croppedImageUrl)
+            setNewBanner({ ...newBanner, image: croppedImageUrl as string })
+            setImageForCrop(null) 
+        }
     }
+
 
     const handleImageFile = (file: File | undefined) => {
         if (file && file.type.startsWith('image/jpeg')) {
@@ -254,7 +282,41 @@ export default function Banners() {
                         </div>
                     </div>
                 )}
-
+                 {/* Image Cropping Modal */}
+                 {imageForCrop && (
+                    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+                        <div className="bg-white dark:bg-black rounded-lg shadow-lg p-6 w-full max-w-3xl mx-4">
+                            <h2 className="text-lg font-semibold mb-4">Crop Your Image</h2>
+                            <div className="relative w-full h-64 bg-gray-200">
+                                <Cropper
+                                    image={imageForCrop}
+                                    crop={crop}
+                                    zoom={zoom}
+                                    rotation={rotation}
+                                    aspect={2.5}
+                                    onCropChange={setCrop}
+                                    onZoomChange={setZoom}
+                                    onRotationChange={setRotation}
+                                    onCropComplete={onCropComplete}
+                                />
+                            </div>
+                            <div className="flex justify-end mt-4">
+                                <button
+                                    onClick={() => setImageForCrop(null)}
+                                    className="py-2 px-4 bg-gray-400 text-white rounded-md mr-2"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleCropSave}
+                                    className="py-2 px-4 bg-[#71389d] text-white rounded-md"
+                                >
+                                    Save
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
                 {/* Delete Confirmation Modal */}
                 {isDeleteModalOpen && (
                     <DeleteBannerModal
@@ -285,3 +347,5 @@ export default function Banners() {
         </div>
     )
 }
+
+
